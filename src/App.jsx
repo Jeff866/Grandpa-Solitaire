@@ -21,14 +21,6 @@ import {
 } from "./game/rules";
 
 
-const SUITS = [
-  "♠",
-  "♥",
-  "♦",
-  "♣",
-];
-
-
 export default function App() {
 
 
@@ -53,8 +45,6 @@ export default function App() {
     setGame(reset);
 
   }
-
-
 
 
 
@@ -88,8 +78,6 @@ export default function App() {
 
 
 
-
-
   function handleDealOne() {
 
     const updated = cloneGame();
@@ -102,8 +90,6 @@ export default function App() {
     setGame(updated);
 
   }
-
-
 
 
 
@@ -120,19 +106,15 @@ export default function App() {
 
 
 
-
   function handleSelectPile(rank) {
 
     const updated = cloneGame();
-
 
     updated.hand.push(
       ...updated.dealPiles[rank]
     );
 
-
     updated.dealPiles[rank] = [];
-
 
     setGame(updated);
 
@@ -142,37 +124,37 @@ export default function App() {
 
 
 
-
-
   function handlePlayCard(card, index) {
+
 
     const updated = cloneGame();
 
 
     const suitIndex =
-      SUITS.indexOf(card.suit);
+      {
+        "♠": 0,
+        "♥": 1,
+        "♦": 2,
+        "♣": 3,
+      }[card.suit];
 
 
 
-    // Try ascending first
-
-    const ascendingPile =
+    const foundation =
       updated.ascending[suitIndex];
 
 
-    if (
+
+    const legal =
       canPlayCard(
         card,
-        ascendingPile,
+        foundation,
         FOUNDATION_TYPES.ASCENDING
-      )
-    ) {
+      );
 
-      ascendingPile.push(card);
 
-      updated.hand.splice(index,1);
 
-      setGame(updated);
+    if (!legal) {
 
       return;
 
@@ -180,37 +162,20 @@ export default function App() {
 
 
 
-
-    // Try descending second
-
-    const descendingPile =
-      updated.descending[suitIndex];
+    foundation.push(card);
 
 
 
-    if (
-      canPlayCard(
-        card,
-        descendingPile,
-        FOUNDATION_TYPES.DESCENDING
-      )
-    ) {
-
-      descendingPile.push(card);
-
-      updated.hand.splice(index,1);
-
-      setGame(updated);
-
-      return;
-
-    }
+    updated.hand.splice(
+      index,
+      1
+    );
 
 
+
+    setGame(updated);
 
   }
-
-
 
 
 
@@ -236,6 +201,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-8">
 
 
+
         <StatusBar
 
           phase={game.phase}
@@ -247,8 +213,6 @@ export default function App() {
           hand={game.hand}
 
         />
-
-
 
 
 
@@ -300,7 +264,6 @@ export default function App() {
 
 
 
-
         <Hand
 
           cards={game.hand}
@@ -308,9 +271,6 @@ export default function App() {
           onPlayCard={handlePlayCard}
 
         />
-
-
-
 
 
 
@@ -328,23 +288,17 @@ export default function App() {
           <div className="grid grid-cols-4 gap-4">
 
 
-            {SUITS.map((suit,index)=>(
-
+            {game.ascending.map((pile,index)=>(
 
               <FoundationPile
 
-                key={suit}
+                key={index}
 
-                suit={suit}
+                title="A → K"
 
-                direction="ascending"
-
-                cards={
-                  game.ascending[index] || []
-                }
+                cards={pile}
 
               />
-
 
             ))}
 
@@ -353,7 +307,6 @@ export default function App() {
 
 
         </section>
-
 
 
 
@@ -372,23 +325,17 @@ export default function App() {
           <div className="grid grid-cols-4 gap-4">
 
 
-            {SUITS.map((suit,index)=>(
-
+            {game.descending.map((pile,index)=>(
 
               <FoundationPile
 
-                key={suit}
+                key={index}
 
-                suit={suit}
+                title="K → A"
 
-                direction="descending"
-
-                cards={
-                  game.descending[index] || []
-                }
+                cards={pile}
 
               />
-
 
             ))}
 
@@ -397,8 +344,6 @@ export default function App() {
 
 
         </section>
-
-
 
 
 
