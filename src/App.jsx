@@ -57,6 +57,7 @@ export default function App() {
 
 
 
+
   function cloneGame() {
 
     return {
@@ -73,11 +74,9 @@ export default function App() {
         ...game.dealPiles,
       },
 
-
       ascending: game.ascending.map(
         pile => [...pile]
       ),
-
 
       descending: game.descending.map(
         pile => [...pile]
@@ -100,7 +99,6 @@ export default function App() {
     updated.currentPile =
       (updated.currentPile + 1) % 13;
 
-
     setGame(updated);
 
   }
@@ -118,7 +116,6 @@ export default function App() {
     setGame(updated);
 
   }
-
 
 
 
@@ -149,9 +146,7 @@ export default function App() {
 
   function handlePlayCard(card, index) {
 
-
     const updated = cloneGame();
-
 
 
     const suitIndex =
@@ -159,21 +154,25 @@ export default function App() {
 
 
 
-    const foundation =
+    // Try ascending first
+
+    const ascendingPile =
       updated.ascending[suitIndex];
 
 
-
-    const legal =
+    if (
       canPlayCard(
         card,
-        foundation,
+        ascendingPile,
         FOUNDATION_TYPES.ASCENDING
-      );
+      )
+    ) {
 
+      ascendingPile.push(card);
 
+      updated.hand.splice(index,1);
 
-    if (!legal) {
+      setGame(updated);
 
       return;
 
@@ -181,20 +180,36 @@ export default function App() {
 
 
 
-    foundation.push(card);
+
+    // Try descending second
+
+    const descendingPile =
+      updated.descending[suitIndex];
 
 
 
-    updated.hand.splice(
-      index,
-      1
-    );
+    if (
+      canPlayCard(
+        card,
+        descendingPile,
+        FOUNDATION_TYPES.DESCENDING
+      )
+    ) {
+
+      descendingPile.push(card);
+
+      updated.hand.splice(index,1);
+
+      setGame(updated);
+
+      return;
+
+    }
 
 
-
-    setGame(updated);
 
   }
+
 
 
 
@@ -219,7 +234,6 @@ export default function App() {
 
 
       <main className="max-w-7xl mx-auto p-8">
-
 
 
         <StatusBar
@@ -262,7 +276,6 @@ export default function App() {
                   handleSelectPile(rank)
                 }
 
-
                 card={
                   game.dealPiles[rank].at(-1)
                   ||
@@ -302,6 +315,7 @@ export default function App() {
 
 
 
+
         <section className="mt-10">
 
 
@@ -314,7 +328,7 @@ export default function App() {
           <div className="grid grid-cols-4 gap-4">
 
 
-            {SUITS.map((suit, index) => (
+            {SUITS.map((suit,index)=>(
 
 
               <FoundationPile
@@ -358,7 +372,7 @@ export default function App() {
           <div className="grid grid-cols-4 gap-4">
 
 
-            {SUITS.map((suit, index) => (
+            {SUITS.map((suit,index)=>(
 
 
               <FoundationPile
