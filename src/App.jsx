@@ -21,6 +21,14 @@ import {
 } from "./game/rules";
 
 
+const SUITS = {
+  "♠": 0,
+  "♥": 1,
+  "♦": 2,
+  "♣": 3,
+};
+
+
 export default function App() {
 
 
@@ -36,6 +44,7 @@ export default function App() {
 
 
 
+
   function newGame() {
 
     const reset = createEmptyGame();
@@ -45,6 +54,7 @@ export default function App() {
     setGame(reset);
 
   }
+
 
 
 
@@ -78,6 +88,8 @@ export default function App() {
 
 
 
+
+
   function handleDealOne() {
 
     const updated = cloneGame();
@@ -90,6 +102,8 @@ export default function App() {
     setGame(updated);
 
   }
+
+
 
 
 
@@ -106,19 +120,25 @@ export default function App() {
 
 
 
+
+
   function handleSelectPile(rank) {
 
     const updated = cloneGame();
+
 
     updated.hand.push(
       ...updated.dealPiles[rank]
     );
 
+
     updated.dealPiles[rank] = [];
+
 
     setGame(updated);
 
   }
+
 
 
 
@@ -131,30 +151,11 @@ export default function App() {
 
 
     const suitIndex =
-      {
-        "♠": 0,
-        "♥": 1,
-        "♦": 2,
-        "♣": 3,
-      }[card.suit];
+      SUITS[card.suit];
 
 
 
-    const foundation =
-      updated.ascending[suitIndex];
-
-
-
-    const legal =
-      canPlayCard(
-        card,
-        foundation,
-        FOUNDATION_TYPES.ASCENDING
-      );
-
-
-
-    if (!legal) {
+    if (suitIndex === undefined) {
 
       return;
 
@@ -162,20 +163,64 @@ export default function App() {
 
 
 
-    foundation.push(card);
+
+    // Try ascending A → K
+
+    const ascending =
+      updated.ascending[suitIndex];
 
 
 
-    updated.hand.splice(
-      index,
-      1
-    );
+    if (
+      canPlayCard(
+        card,
+        ascending,
+        FOUNDATION_TYPES.ASCENDING
+      )
+    ) {
+
+      ascending.push(card);
+
+      updated.hand.splice(index,1);
+
+      setGame(updated);
+
+      return;
+
+    }
 
 
 
-    setGame(updated);
+
+
+    // Try descending K → A
+
+    const descending =
+      updated.descending[suitIndex];
+
+
+
+    if (
+      canPlayCard(
+        card,
+        descending,
+        FOUNDATION_TYPES.DESCENDING
+      )
+    ) {
+
+      descending.push(card);
+
+      updated.hand.splice(index,1);
+
+      setGame(updated);
+
+      return;
+
+    }
+
 
   }
+
 
 
 
@@ -201,7 +246,6 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-8">
 
 
-
         <StatusBar
 
           phase={game.phase}
@@ -213,6 +257,8 @@ export default function App() {
           hand={game.hand}
 
         />
+
+
 
 
 
@@ -276,13 +322,13 @@ export default function App() {
 
 
 
+
         <section className="mt-10">
 
 
           <h2 className="text-2xl font-bold mb-4">
             Ascending Foundations
           </h2>
-
 
 
           <div className="grid grid-cols-4 gap-4">
@@ -307,6 +353,7 @@ export default function App() {
 
 
         </section>
+
 
 
 
