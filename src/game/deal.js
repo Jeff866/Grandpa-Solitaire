@@ -15,13 +15,12 @@ export const RANKS = [
 ];
 
 
+
 export function createEmptyGame() {
 
   return {
 
-    phase: "deal",
-
-    currentPile: 0,
+    phase: "Deal",
 
     stock: [],
 
@@ -29,23 +28,44 @@ export function createEmptyGame() {
 
     hand: [],
 
-    dealPiles: Object.fromEntries(
-      RANKS.map(rank => [rank, []])
-    ),
+
+    currentPile: 0,
+
+
+    dealPiles: {
+
+      A: [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      J: [],
+      Q: [],
+      K: [],
+
+    },
+
 
     ascending: [
       [],
       [],
       [],
-      []
+      [],
     ],
+
 
     descending: [
       [],
       [],
       [],
-      []
+      [],
     ],
+
 
   };
 
@@ -53,75 +73,63 @@ export function createEmptyGame() {
 
 
 
-function takeCard(game) {
-
-  if (game.stock.length === 0) {
-    return null;
-  }
-
-  return game.stock.shift();
-
-}
 
 
 
 export function dealCard(game) {
 
-  const card = takeCard(game);
 
+  if (game.stock.length === 0) {
 
-  if (!card) {
-    return game;
+    return;
+
   }
 
 
-  const pileRank =
+
+  const card =
+    game.stock.pop();
+
+
+
+  const targetRank =
     RANKS[game.currentPile];
 
 
-  game.dealPiles[pileRank].push(card);
+
+  const isMatch =
+    card.rank === targetRank;
 
 
 
-  // Ace penalty
-  if (card.rank === "A") {
+  const isAce =
+    card.rank === "A";
 
-    const penalty =
-      takeCard(game);
 
-    if (penalty) {
-      game.discard.push(penalty);
-    }
+
+  if (isMatch || isAce) {
+
+
+    game.discard.push(card);
+
+
+  } else {
+
+
+    game.dealPiles[targetRank].push(card);
+
 
   }
 
 
 
-  // Matching rank penalty
-  if (card.rank === pileRank) {
+  game.currentPile =
+    (game.currentPile + 1) % RANKS.length;
 
-    const penaltyOne =
-      takeCard(game);
-
-    const penaltyTwo =
-      takeCard(game);
-
-
-    if (penaltyOne) {
-      game.discard.push(penaltyOne);
-    }
-
-
-    if (penaltyTwo) {
-      game.discard.push(penaltyTwo);
-    }
-
-  }
-
-
-  return game;
 
 }
+
+
 
 
 
@@ -136,13 +144,7 @@ export function dealRound(game) {
 
     dealCard(game);
 
-
-    game.currentPile =
-      (game.currentPile + 1) % 13;
-
   }
 
-
-  return game;
 
 }

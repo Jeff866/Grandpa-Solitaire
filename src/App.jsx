@@ -44,7 +44,6 @@ export default function App() {
 
 
 
-
   function newGame() {
 
     const reset = createEmptyGame();
@@ -54,7 +53,6 @@ export default function App() {
     setGame(reset);
 
   }
-
 
 
 
@@ -89,7 +87,6 @@ export default function App() {
 
 
 
-
   function handleDealOne() {
 
     const updated = cloneGame();
@@ -102,7 +99,6 @@ export default function App() {
     setGame(updated);
 
   }
-
 
 
 
@@ -121,19 +117,15 @@ export default function App() {
 
 
 
-
   function handleSelectPile(rank) {
 
     const updated = cloneGame();
-
 
     updated.hand.push(
       ...updated.dealPiles[rank]
     );
 
-
     updated.dealPiles[rank] = [];
-
 
     setGame(updated);
 
@@ -143,9 +135,7 @@ export default function App() {
 
 
 
-
-  function handlePlayCard(card, index) {
-
+  function handlePlayCard(card,index) {
 
     const updated = cloneGame();
 
@@ -154,21 +144,13 @@ export default function App() {
       SUITS[card.suit];
 
 
-
     if (suitIndex === undefined) {
-
       return;
-
     }
 
 
-
-
-    // Try ascending A → K
-
     const ascending =
       updated.ascending[suitIndex];
-
 
 
     if (
@@ -191,13 +173,8 @@ export default function App() {
 
 
 
-
-
-    // Try descending K → A
-
     const descending =
       updated.descending[suitIndex];
-
 
 
     if (
@@ -220,8 +197,6 @@ export default function App() {
 
 
   }
-
-
 
 
 
@@ -256,23 +231,22 @@ export default function App() {
 
           hand={game.hand}
 
+          nextRank={
+            RANKS[game.currentPile]
+          }
+
         />
 
 
 
-
-
         <section className="mb-10">
-
 
           <h2 className="text-2xl font-bold mb-4">
             Deal Piles
           </h2>
 
 
-
           <div className="grid grid-cols-7 gap-4">
-
 
             {RANKS.map(rank => (
 
@@ -309,7 +283,6 @@ export default function App() {
 
 
 
-
         <Hand
 
           cards={game.hand}
@@ -321,10 +294,7 @@ export default function App() {
 
 
 
-
-
         <section className="mt-10">
-
 
           <h2 className="text-2xl font-bold mb-4">
             Ascending Foundations
@@ -332,7 +302,6 @@ export default function App() {
 
 
           <div className="grid grid-cols-4 gap-4">
-
 
             {game.ascending.map((pile,index)=>(
 
@@ -358,19 +327,14 @@ export default function App() {
 
 
 
-
-
         <section className="mt-10">
-
 
           <h2 className="text-2xl font-bold mb-4">
             Descending Foundations
           </h2>
 
 
-
           <div className="grid grid-cols-4 gap-4">
-
 
             {game.descending.map((pile,index)=>(
 
@@ -391,7 +355,6 @@ export default function App() {
 
 
         </section>
-
 
 
       </main>

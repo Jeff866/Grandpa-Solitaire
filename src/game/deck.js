@@ -1,9 +1,22 @@
 const SUITS = [
-  { symbol: "♠", red: false },
-  { symbol: "♥", red: true },
-  { symbol: "♦", red: true },
-  { symbol: "♣", red: false },
+  {
+    symbol: "♠",
+    red: false,
+  },
+  {
+    symbol: "♥",
+    red: true,
+  },
+  {
+    symbol: "♦",
+    red: true,
+  },
+  {
+    symbol: "♣",
+    red: false,
+  },
 ];
+
 
 const RANKS = [
   "A",
@@ -21,38 +34,76 @@ const RANKS = [
   "K",
 ];
 
+
+
 export function createDeck() {
+
   const deck = [];
+
   let id = 1;
 
-  // Two standard decks
-  for (let d = 0; d < 2; d++) {
+
+  for (let deckNumber = 1; deckNumber <= 2; deckNumber++) {
+
+
     for (const suit of SUITS) {
+
       for (const rank of RANKS) {
+
         deck.push({
+
           id: id++,
+
+          deckNumber,
+
           rank,
+
           suit: suit.symbol,
+
           red: suit.red,
+
         });
+
       }
+
     }
+
   }
+
 
   return deck;
+
 }
 
-export function shuffle(deck) {
-  const cards = [...deck];
 
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
+
+
+
+export function shuffle(cards) {
+
+  const shuffled = [...cards];
+
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+
+    const j =
+      Math.floor(
+        Math.random() * (i + 1)
+      );
+
+
+    [
+      shuffled[i],
+      shuffled[j],
+    ] =
+    [
+      shuffled[j],
+      shuffled[i],
+    ];
+
   }
 
-  return cards;
-}
 
-export function newGame() {
-  return shuffle(createDeck());
+  return shuffled;
+
 }
