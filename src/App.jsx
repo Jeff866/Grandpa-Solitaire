@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import StatusBar from "./components/StatusBar";
 import StockArea from "./components/StockArea";
 import FoundationStatus from "./components/FoundationStatus";
+import VictoryBanner from "./components/VictoryBanner";
 import DealPile from "./components/DealPile";
 import FoundationPile from "./components/FoundationPile";
 import Hand from "./components/Hand";
@@ -31,6 +32,7 @@ const SUITS = {
 };
 
 
+
 export default function App() {
 
 
@@ -38,7 +40,8 @@ export default function App() {
 
     const newGame = createEmptyGame();
 
-    newGame.stock = shuffle(createDeck());
+    newGame.stock =
+      shuffle(createDeck());
 
     return newGame;
 
@@ -46,16 +49,18 @@ export default function App() {
 
 
 
+
   function newGame() {
 
-    const reset = createEmptyGame();
+    const reset =
+      createEmptyGame();
 
-    reset.stock = shuffle(createDeck());
+    reset.stock =
+      shuffle(createDeck());
 
     setGame(reset);
 
   }
-
 
 
 
@@ -94,7 +99,8 @@ export default function App() {
 
   function handleDealOne() {
 
-    const updated = cloneGame();
+    const updated =
+      cloneGame();
 
     dealCard(updated);
 
@@ -108,7 +114,8 @@ export default function App() {
 
   function handleDealRound() {
 
-    const updated = cloneGame();
+    const updated =
+      cloneGame();
 
     dealRound(updated);
 
@@ -120,15 +127,20 @@ export default function App() {
 
 
 
+
   function handleSelectPile(rank) {
 
-    const updated = cloneGame();
+    const updated =
+      cloneGame();
+
 
     updated.hand.push(
       ...updated.dealPiles[rank]
     );
 
+
     updated.dealPiles[rank] = [];
+
 
     setGame(updated);
 
@@ -142,7 +154,8 @@ export default function App() {
   function handlePlayCard(card,index) {
 
 
-    const updated = cloneGame();
+    const updated =
+      cloneGame();
 
 
     const suitIndex =
@@ -154,6 +167,7 @@ export default function App() {
       return;
 
     }
+
 
 
 
@@ -173,7 +187,12 @@ export default function App() {
 
       ascending.push(card);
 
-      updated.hand.splice(index,1);
+
+      updated.hand.splice(
+        index,
+        1
+      );
+
 
       setGame(updated);
 
@@ -201,17 +220,37 @@ export default function App() {
 
       descending.push(card);
 
-      updated.hand.splice(index,1);
+
+      updated.hand.splice(
+        index,
+        1
+      );
+
 
       setGame(updated);
-
-      return;
 
     }
 
 
   }
 
+
+
+
+
+
+
+  const won =
+
+    game.ascending.every(
+      pile => pile.length === 13
+    )
+
+    &&
+
+    game.descending.every(
+      pile => pile.length === 13
+    );
 
 
 
@@ -235,6 +274,7 @@ export default function App() {
 
 
 
+
       <main className="max-w-7xl mx-auto p-8">
 
 
@@ -249,9 +289,21 @@ export default function App() {
 
           hand={game.hand}
 
-          nextRank={RANKS[game.currentPile]}
+          nextRank={
+            RANKS[game.currentPile]
+          }
 
         />
+
+
+
+
+        <VictoryBanner
+
+          won={won}
+
+        />
+
 
 
 
@@ -265,11 +317,16 @@ export default function App() {
 
 
 
+
         <StockArea
 
-          stock={game.stock.length}
+          stock={
+            game.stock.length
+          }
 
-          discard={game.discard}
+          discard={
+            game.discard
+          }
 
         />
 
@@ -283,6 +340,7 @@ export default function App() {
           <h2 className="text-2xl font-bold mb-4">
             Deal Piles
           </h2>
+
 
 
           <div className="grid grid-cols-7 gap-4">
@@ -324,6 +382,7 @@ export default function App() {
 
 
 
+
         <Hand
 
           cards={game.hand}
@@ -336,12 +395,14 @@ export default function App() {
 
 
 
+
         <section className="mt-10">
 
 
           <h2 className="text-2xl font-bold mb-4">
             Ascending Foundations
           </h2>
+
 
 
           <div className="grid grid-cols-4 gap-4">
@@ -372,13 +433,13 @@ export default function App() {
 
 
 
-
         <section className="mt-10">
 
 
           <h2 className="text-2xl font-bold mb-4">
             Descending Foundations
           </h2>
+
 
 
           <div className="grid grid-cols-4 gap-4">
@@ -403,6 +464,7 @@ export default function App() {
 
 
         </section>
+
 
 
 
