@@ -20,9 +20,10 @@ export function createEmptyGame() {
 
     stock: [],
 
-    // During Deal this is the face-down discard pile.
-    // When dealing finishes it becomes the face-up draw pile.
+    // Face-down during the deal.
     discard: [],
+
+    // Created when the deal ends.
     drawPile: [],
 
     piles: {
@@ -62,7 +63,7 @@ function burnCard(game) {
 }
 
 function beginPlay(game) {
-  // Flip the discard pile to create the draw pile.
+  // Flip the discard pile over to become the draw pile.
   game.drawPile = game.discard
     .slice()
     .reverse()
@@ -75,16 +76,10 @@ function beginPlay(game) {
   game.phase = "Play";
 }
 
-function placeOnPile(game, pileRank, card) {
-  game.piles[pileRank].push({
-    ...card,
-    faceUp: true,
-  });
-}
-
 export function drawCard(game) {
   if (game.phase !== "Play") return;
 
+  // Only one active card in hand for now.
   if (game.hand.length > 0) return;
 
   if (game.drawPile.length === 0) return;
@@ -102,21 +97,30 @@ export function dealOne(game) {
 
   const pileRank = RANKS[game.currentPile];
 
-  const card = game.stock.pop();
+  const card = {
+    ...game.stock.pop(),
+    faceUp: true,
+  };
 
-  placeOnPile(game, pileRank, card);
+  game.piles[pileRank].push(card);
 
   const isAce = card.rank === "A";
   const isMatch = card.rank === pileRank;
 
-  if (isAce) burnCard(game);
+  // Every Ace burns one extra card.
+  if (isAce) {
+    burnCard(game);
+  }
 
+  // Every matching pile burns two extra cards.
+  // Ace on the Ace pile therefore burns three.
   if (isMatch) {
     burnCard(game);
     burnCard(game);
   }
 
-  game.currentPile = (game.currentPile + 1) % RANKS.length;
+  game.currentPile =
+    (game.currentPile + 1) % RANKS.length;
 
   if (game.stock.length === 0) {
     beginPlay(game);
@@ -126,7 +130,11 @@ export function dealOne(game) {
 export function dealRound(game) {
   if (game.phase !== "Deal") return;
 
-  for (let i = 0; i < RANKS.length && game.phase === "Deal"; i++) {
+  for (
+    let i = 0;
+    i < RANKS.length && game.phase === "Deal";
+    i++
+  ) {
     dealOne(game);
   }
 }
