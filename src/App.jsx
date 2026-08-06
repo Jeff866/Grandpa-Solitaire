@@ -18,7 +18,14 @@ import {
   RANKS,
 } from "./game/deal";
 
+import {
+  playCard,
+  isVictory,
+} from "./game/play";
+
 export default function App() {
+  const [won, setWon] = useState(false);
+
   const [game, setGame] = useState(() => {
     const fresh = createEmptyGame();
     fresh.stock = shuffle(createDeck());
@@ -28,6 +35,8 @@ export default function App() {
   function newGame() {
     const fresh = createEmptyGame();
     fresh.stock = shuffle(createDeck());
+
+    setWon(false);
     setGame(fresh);
   }
 
@@ -57,6 +66,20 @@ export default function App() {
     const updated = cloneGame();
     action(updated);
     setGame(updated);
+  }
+
+  function handlePlay(move) {
+    updateGame((updated) => {
+      const success = playCard(updated, move);
+
+      if (!success) return;
+
+      drawCard(updated);
+
+      if (isVictory(updated)) {
+        setWon(true);
+      }
+    });
   }
 
   return (
@@ -90,7 +113,7 @@ export default function App() {
 
         <GameMessage
           phase={game.phase}
-          won={false}
+          won={won}
         />
 
         <StockArea
@@ -165,6 +188,9 @@ export default function App() {
           <FoundationStatus
             ascending={game.ascending}
             descending={game.descending}
+            hand={game.hand}
+            game={game}
+            onPlay={handlePlay}
           />
         </section>
 
