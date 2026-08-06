@@ -66,10 +66,10 @@ export function createEmptyGame() {
       [],
     ],
 
-
   };
 
 }
+
 
 
 
@@ -80,6 +80,8 @@ export function dealCard(game) {
 
 
   if (game.stock.length === 0) {
+
+    game.phase = "Complete";
 
     return;
 
@@ -97,17 +99,14 @@ export function dealCard(game) {
 
 
 
-  const isMatch =
+  const penalty =
+    card.rank === "A"
+    ||
     card.rank === targetRank;
 
 
 
-  const isAce =
-    card.rank === "A";
-
-
-
-  if (isMatch || isAce) {
+  if (penalty) {
 
 
     game.discard.push(card);
@@ -123,11 +122,24 @@ export function dealCard(game) {
 
 
 
+
   game.currentPile =
-    (game.currentPile + 1) % RANKS.length;
+    (game.currentPile + 1)
+    %
+    RANKS.length;
+
+
+
+  if (game.stock.length === 0) {
+
+    game.phase = "Complete";
+
+  }
 
 
 }
+
+
 
 
 

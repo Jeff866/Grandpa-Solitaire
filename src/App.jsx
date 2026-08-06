@@ -5,6 +5,7 @@ import StatusBar from "./components/StatusBar";
 import StockArea from "./components/StockArea";
 import FoundationStatus from "./components/FoundationStatus";
 import VictoryBanner from "./components/VictoryBanner";
+import GameMessage from "./components/GameMessage";
 import DealPile from "./components/DealPile";
 import FoundationPile from "./components/FoundationPile";
 import Hand from "./components/Hand";
@@ -50,6 +51,7 @@ export default function App() {
 
 
 
+
   function newGame() {
 
     const reset =
@@ -61,6 +63,7 @@ export default function App() {
     setGame(reset);
 
   }
+
 
 
 
@@ -97,6 +100,7 @@ export default function App() {
 
 
 
+
   function handleDealOne() {
 
     const updated =
@@ -107,6 +111,7 @@ export default function App() {
     setGame(updated);
 
   }
+
 
 
 
@@ -151,11 +156,13 @@ export default function App() {
 
 
 
+
   function handlePlayCard(card,index) {
 
 
     const updated =
       cloneGame();
+
 
 
     const suitIndex =
@@ -199,6 +206,7 @@ export default function App() {
       return;
 
     }
+
 
 
 
@@ -262,6 +270,7 @@ export default function App() {
     <div className="min-h-screen bg-green-900 text-white">
 
 
+
       <Header
 
         onNewGame={newGame}
@@ -276,6 +285,8 @@ export default function App() {
 
 
       <main className="max-w-7xl mx-auto p-8">
+
+
 
 
 
@@ -298,11 +309,15 @@ export default function App() {
 
 
 
-        <VictoryBanner
+
+        <GameMessage
+
+          phase={game.phase}
 
           won={won}
 
         />
+
 
 
 
@@ -318,6 +333,7 @@ export default function App() {
 
 
 
+
         <StockArea
 
           stock={
@@ -329,6 +345,7 @@ export default function App() {
           }
 
         />
+
 
 
 
@@ -383,6 +400,7 @@ export default function App() {
 
 
 
+
         <Hand
 
           cards={game.hand}
@@ -390,6 +408,7 @@ export default function App() {
           onPlayCard={handlePlayCard}
 
         />
+
 
 
 
@@ -427,6 +446,7 @@ export default function App() {
 
 
         </section>
+
 
 
 
