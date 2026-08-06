@@ -26,13 +26,8 @@ export function createEmptyGame() {
 
     discard: [],
 
-    hand: [],
 
-
-    currentPile: 0,
-
-
-    dealPiles: {
+    piles: {
 
       A: [],
       "2": [],
@@ -51,6 +46,9 @@ export function createEmptyGame() {
     },
 
 
+    currentPile: 0,
+
+
     ascending: [
       [],
       [],
@@ -64,7 +62,12 @@ export function createEmptyGame() {
       [],
       [],
       [],
+
     ],
+
+
+    hand: [],
+
 
   };
 
@@ -75,17 +78,48 @@ export function createEmptyGame() {
 
 
 
+function burnCard(game) {
 
-export function dealCard(game) {
+  if (game.stock.length === 0) {
+    return;
+  }
+
+
+  const card =
+    game.stock.pop();
+
+
+  game.discard.push({
+
+    ...card,
+
+    faceUp: false,
+
+  });
+
+}
+
+
+
+
+
+
+
+export function dealOne(game) {
 
 
   if (game.stock.length === 0) {
 
-    game.phase = "Complete";
+    game.phase = "Play";
 
     return;
 
   }
+
+
+
+  const pileRank =
+    RANKS[game.currentPile];
 
 
 
@@ -94,29 +128,40 @@ export function dealCard(game) {
 
 
 
-  const targetRank =
-    RANKS[game.currentPile];
+  // Every card goes onto the current pile
+
+  game.piles[pileRank].push(card);
 
 
 
-  const penalty =
-    card.rank === "A"
-    ||
-    card.rank === targetRank;
+
+  const isAce =
+    card.rank === "A";
 
 
 
-  if (penalty) {
+  const isMatch =
+    card.rank === pileRank;
 
 
-    game.discard.push(card);
+
+  // Ace penalty
+
+  if (isAce) {
+
+    burnCard(game);
+
+  }
 
 
-  } else {
 
+  // Matching rank penalty
 
-    game.dealPiles[targetRank].push(card);
+  if (isMatch) {
 
+    burnCard(game);
+
+    burnCard(game);
 
   }
 
@@ -124,15 +169,19 @@ export function dealCard(game) {
 
 
   game.currentPile =
-    (game.currentPile + 1)
+    (
+      game.currentPile + 1
+    )
     %
     RANKS.length;
 
 
 
+
+
   if (game.stock.length === 0) {
 
-    game.phase = "Complete";
+    game.phase = "Play";
 
   }
 
@@ -154,7 +203,7 @@ export function dealRound(game) {
     i++
   ) {
 
-    dealCard(game);
+    dealOne(game);
 
   }
 

@@ -4,103 +4,143 @@ export const FOUNDATION_TYPES = {
 };
 
 
-export const SUITS = [
-  "♠",
-  "♥",
-  "♦",
-  "♣",
-];
+const VALUES = {
+  A: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  10: 10,
+  J: 11,
+  Q: 12,
+  K: 13,
+};
 
 
-export const RANKS = [
-  "A",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-];
 
 
 
 export function canPlayCard(
   card,
-  pile,
-  direction
+  foundation,
+  type
 ) {
+
 
   if (!card) {
     return false;
   }
 
 
-  // Empty foundation
 
-  if (pile.length === 0) {
-
-    if (
-      direction === FOUNDATION_TYPES.ASCENDING
-    ) {
-      return card.rank === "A";
-    }
+  if (!foundation) {
+    return false;
+  }
 
 
-    if (
-      direction === FOUNDATION_TYPES.DESCENDING
-    ) {
-      return card.rank === "K";
-    }
+
+
+  // Empty ascending foundation starts with Ace
+
+  if (
+    foundation.length === 0
+    &&
+    type === FOUNDATION_TYPES.ASCENDING
+  ) {
+
+    return VALUES[card.rank] === 1;
 
   }
 
 
 
-  const lastCard =
-    pile[pile.length - 1];
 
 
-  return (
+  // Empty descending foundation starts with King
 
-    card.suit === lastCard.suit &&
+  if (
+    foundation.length === 0
+    &&
+    type === FOUNDATION_TYPES.DESCENDING
+  ) {
 
-    getNextRank(
-      lastCard.rank,
-      direction
-    ) === card.rank
+    return VALUES[card.rank] === 13;
 
-  );
-
-}
+  }
 
 
 
 
-function getNextRank(
-  rank,
-  direction
-) {
 
-  const index =
-    RANKS.indexOf(rank);
+
+  const top =
+    foundation[
+      foundation.length - 1
+    ];
+
+
+
+
+
+  // Must match suit
+
+  if (
+    card.suit !== top.suit
+  ) {
+
+    return false;
+
+  }
+
+
+
+
+
+
+  const current =
+    VALUES[card.rank];
+
+
+  const previous =
+    VALUES[top.rank];
+
+
+
 
 
 
   if (
-    direction === FOUNDATION_TYPES.ASCENDING
+    type === FOUNDATION_TYPES.ASCENDING
   ) {
 
-    return RANKS[index + 1];
+    return current === previous + 1;
 
   }
 
 
-  return RANKS[index - 1];
+
+
+
+
+
+  if (
+    type === FOUNDATION_TYPES.DESCENDING
+  ) {
+
+    return current === previous - 1;
+
+  }
+
+
+
+
+
+
+  return false;
+
 
 }

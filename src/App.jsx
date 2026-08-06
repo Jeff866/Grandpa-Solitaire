@@ -3,34 +3,19 @@ import { useState } from "react";
 import Header from "./components/Header";
 import StatusBar from "./components/StatusBar";
 import StockArea from "./components/StockArea";
-import FoundationStatus from "./components/FoundationStatus";
-import VictoryBanner from "./components/VictoryBanner";
-import GameMessage from "./components/GameMessage";
 import DealPile from "./components/DealPile";
-import FoundationPile from "./components/FoundationPile";
+import FoundationStatus from "./components/FoundationStatus";
 import Hand from "./components/Hand";
+import GameMessage from "./components/GameMessage";
 
 import { createDeck, shuffle } from "./game/deck";
 
 import {
   createEmptyGame,
-  dealCard,
+  dealOne,
   dealRound,
   RANKS,
 } from "./game/deal";
-
-import {
-  canPlayCard,
-  FOUNDATION_TYPES,
-} from "./game/rules";
-
-
-const SUITS = {
-  "♠": 0,
-  "♥": 1,
-  "♦": 2,
-  "♣": 3,
-};
 
 
 
@@ -39,12 +24,13 @@ export default function App() {
 
   const [game, setGame] = useState(() => {
 
-    const newGame = createEmptyGame();
+    const fresh =
+      createEmptyGame();
 
-    newGame.stock =
+    fresh.stock =
       shuffle(createDeck());
 
-    return newGame;
+    return fresh;
 
   });
 
@@ -54,15 +40,17 @@ export default function App() {
 
   function newGame() {
 
-    const reset =
+    const fresh =
       createEmptyGame();
 
-    reset.stock =
+    fresh.stock =
       shuffle(createDeck());
 
-    setGame(reset);
+    setGame(fresh);
 
   }
+
+
 
 
 
@@ -74,27 +62,50 @@ export default function App() {
 
       ...game,
 
-      stock: [...game.stock],
+      stock: [
+        ...game.stock
+      ],
 
-      discard: [...game.discard],
+      discard: [
+        ...game.discard
+      ],
 
-      hand: [...game.hand],
 
-      dealPiles: {
-        ...game.dealPiles,
-      },
+      piles: Object.fromEntries(
 
-      ascending: game.ascending.map(
-        pile => [...pile]
+        RANKS.map(rank => [
+
+          rank,
+
+          [
+            ...game.piles[rank]
+          ]
+
+        ])
+
       ),
 
-      descending: game.descending.map(
-        pile => [...pile]
-      ),
+
+      ascending:
+        game.ascending.map(
+          pile => [...pile]
+        ),
+
+
+      descending:
+        game.descending.map(
+          pile => [...pile]
+        ),
+
+
+      hand: [
+        ...game.hand
+      ]
 
     };
 
   }
+
 
 
 
@@ -106,11 +117,12 @@ export default function App() {
     const updated =
       cloneGame();
 
-    dealCard(updated);
+    dealOne(updated);
 
     setGame(updated);
 
   }
+
 
 
 
@@ -133,142 +145,11 @@ export default function App() {
 
 
 
-  function handleSelectPile(rank) {
-
-    const updated =
-      cloneGame();
-
-
-    updated.hand.push(
-      ...updated.dealPiles[rank]
-    );
-
-
-    updated.dealPiles[rank] = [];
-
-
-    setGame(updated);
-
-  }
-
-
-
-
-
-
-
-  function handlePlayCard(card,index) {
-
-
-    const updated =
-      cloneGame();
-
-
-
-    const suitIndex =
-      SUITS[card.suit];
-
-
-    if (suitIndex === undefined) {
-
-      return;
-
-    }
-
-
-
-
-    const ascending =
-      updated.ascending[suitIndex];
-
-
-
-    if (
-      canPlayCard(
-        card,
-        ascending,
-        FOUNDATION_TYPES.ASCENDING
-      )
-    ) {
-
-
-      ascending.push(card);
-
-
-      updated.hand.splice(
-        index,
-        1
-      );
-
-
-      setGame(updated);
-
-      return;
-
-    }
-
-
-
-
-
-
-    const descending =
-      updated.descending[suitIndex];
-
-
-
-    if (
-      canPlayCard(
-        card,
-        descending,
-        FOUNDATION_TYPES.DESCENDING
-      )
-    ) {
-
-
-      descending.push(card);
-
-
-      updated.hand.splice(
-        index,
-        1
-      );
-
-
-      setGame(updated);
-
-    }
-
-
-  }
-
-
-
-
-
-
-
-  const won =
-
-    game.ascending.every(
-      pile => pile.length === 13
-    )
-
-    &&
-
-    game.descending.every(
-      pile => pile.length === 13
-    );
-
-
-
-
 
 
   return (
 
     <div className="min-h-screen bg-green-900 text-white">
-
 
 
       <Header
@@ -285,8 +166,6 @@ export default function App() {
 
 
       <main className="max-w-7xl mx-auto p-8">
-
-
 
 
 
@@ -314,21 +193,10 @@ export default function App() {
 
           phase={game.phase}
 
-          won={won}
+          won={false}
 
         />
 
-
-
-
-
-        <FoundationStatus
-
-          ascending={game.ascending}
-
-          descending={game.descending}
-
-        />
 
 
 
@@ -351,10 +219,11 @@ export default function App() {
 
 
 
-        <section className="mb-10">
+
+        <section className="mt-10">
 
 
-          <h2 className="text-2xl font-bold mb-4">
+          <h2 className="text-3xl font-bold mb-5">
             Deal Piles
           </h2>
 
@@ -371,18 +240,8 @@ export default function App() {
 
                 label={rank}
 
-                onSelect={() =>
-                  handleSelectPile(rank)
-                }
-
-                card={
-                  game.dealPiles[rank].at(-1)
-                  ||
-                  {
-                    rank:"",
-                    suit:"",
-                    red:false
-                  }
+                cards={
+                  game.piles[rank]
                 }
 
               />
@@ -391,6 +250,30 @@ export default function App() {
 
 
           </div>
+
+
+        </section>
+
+
+
+
+
+
+
+        <section className="mt-10">
+
+
+          <FoundationStatus
+
+            ascending={
+              game.ascending
+            }
+
+            descending={
+              game.descending
+            }
+
+          />
 
 
         </section>
@@ -403,87 +286,12 @@ export default function App() {
 
         <Hand
 
-          cards={game.hand}
-
-          onPlayCard={handlePlayCard}
+          cards={
+            game.hand
+          }
 
         />
 
-
-
-
-
-
-
-        <section className="mt-10">
-
-
-          <h2 className="text-2xl font-bold mb-4">
-            Ascending Foundations
-          </h2>
-
-
-
-          <div className="grid grid-cols-4 gap-4">
-
-
-            {game.ascending.map((pile,index)=>(
-
-              <FoundationPile
-
-                key={index}
-
-                title="A → K"
-
-                cards={pile}
-
-              />
-
-            ))}
-
-
-          </div>
-
-
-        </section>
-
-
-
-
-
-
-
-        <section className="mt-10">
-
-
-          <h2 className="text-2xl font-bold mb-4">
-            Descending Foundations
-          </h2>
-
-
-
-          <div className="grid grid-cols-4 gap-4">
-
-
-            {game.descending.map((pile,index)=>(
-
-              <FoundationPile
-
-                key={index}
-
-                title="K → A"
-
-                cards={pile}
-
-              />
-
-            ))}
-
-
-          </div>
-
-
-        </section>
 
 
 
