@@ -19,7 +19,11 @@ export function createEmptyGame() {
     phase: "Deal",
 
     stock: [],
+
+    // During Deal this is the face-down discard pile.
+    // When dealing finishes it becomes the face-up draw pile.
     discard: [],
+    drawPile: [],
 
     piles: {
       A: [],
@@ -57,19 +61,42 @@ function burnCard(game) {
   });
 }
 
+function beginPlay(game) {
+  // Flip the discard pile to create the draw pile.
+  game.drawPile = game.discard
+    .slice()
+    .reverse()
+    .map((card) => ({
+      ...card,
+      faceUp: true,
+    }));
+
+  game.discard = [];
+  game.phase = "Play";
+}
+
 function placeOnPile(game, pileRank, card) {
-  // During the deal every revealed card remains face-up on the deal pile.
   game.piles[pileRank].push({
     ...card,
     faceUp: true,
   });
 }
 
+export function drawCard(game) {
+  if (game.phase !== "Play") return;
+
+  if (game.hand.length > 0) return;
+
+  if (game.drawPile.length === 0) return;
+
+  game.hand.push(game.drawPile.pop());
+}
+
 export function dealOne(game) {
   if (game.phase !== "Deal") return;
 
   if (game.stock.length === 0) {
-    game.phase = "Play";
+    beginPlay(game);
     return;
   }
 
@@ -82,13 +109,8 @@ export function dealOne(game) {
   const isAce = card.rank === "A";
   const isMatch = card.rank === pileRank;
 
-  // Ace: always burn one card.
-  if (isAce) {
-    burnCard(game);
-  }
+  if (isAce) burnCard(game);
 
-  // Correct pile: burn two additional cards.
-  // If the matching card is also an Ace this correctly burns three total.
   if (isMatch) {
     burnCard(game);
     burnCard(game);
@@ -97,7 +119,7 @@ export function dealOne(game) {
   game.currentPile = (game.currentPile + 1) % RANKS.length;
 
   if (game.stock.length === 0) {
-    game.phase = "Play";
+    beginPlay(game);
   }
 }
 
