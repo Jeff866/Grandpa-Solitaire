@@ -9,10 +9,12 @@ import Hand from "./components/Hand";
 import GameMessage from "./components/GameMessage";
 
 import { createDeck, shuffle } from "./game/deck";
+
 import {
   createEmptyGame,
   dealOne,
   dealRound,
+  drawCard,
   RANKS,
 } from "./game/deal";
 
@@ -32,20 +34,27 @@ export default function App() {
   function cloneGame() {
     return {
       ...game,
+
       stock: [...game.stock],
       discard: [...game.discard],
+      drawPile: [...game.drawPile],
+
       piles: Object.fromEntries(
-        RANKS.map((rank) => [rank, [...game.piles[rank]]])
+        RANKS.map((rank) => [
+          rank,
+          [...game.piles[rank]],
+        ])
       ),
+
       ascending: game.ascending.map((p) => [...p]),
       descending: game.descending.map((p) => [...p]),
       hand: [...game.hand],
     };
   }
 
-  function updateGame(mutator) {
+  function updateGame(action) {
     const updated = cloneGame();
-    mutator(updated);
+    action(updated);
     setGame(updated);
   }
 
@@ -61,9 +70,17 @@ export default function App() {
         <StatusBar
           phase={game.phase}
           stock={game.stock.length}
-          discard={game.discard}
+          discard={
+            game.phase === "Deal"
+              ? game.discard
+              : game.drawPile
+          }
           hand={game.hand}
-          nextRank={game.phase === "Deal" ? RANKS[game.currentPile] : null}
+          nextRank={
+            game.phase === "Deal"
+              ? RANKS[game.currentPile]
+              : null
+          }
         />
 
         <GameMessage
@@ -72,20 +89,62 @@ export default function App() {
         />
 
         <StockArea
-          stock={game.stock.length}
-          discard={game.discard}
+          stock={
+            game.phase === "Deal"
+              ? game.stock.length
+              : game.drawPile.length
+          }
+          discard={
+            game.phase === "Deal"
+              ? game.discard
+              : game.drawPile
+          }
         />
 
+        {game.phase === "Play" && (
+          <section className="mt-6 rounded-xl border border-green-700 bg-green-800/40 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">
+                  Play Phase
+                </h2>
+
+                <p className="text-green-200 mt-1">
+                  The discard pile has been flipped over and
+                  is now your draw pile.
+                </p>
+              </div>
+
+              <button
+                onClick={() => updateGame(drawCard)}
+                disabled={
+                  game.drawPile.length === 0 ||
+                  game.hand.length > 0
+                }
+                className="rounded-lg bg-emerald-500 px-5 py-3 font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Draw Card
+              </button>
+            </div>
+
+            <div className="mt-4 text-sm text-green-200">
+              Draw Pile: {game.drawPile.length} cards
+            </div>
+          </section>
+        )}
+
         <section className="mt-10">
-          <h2 className="text-3xl font-bold mb-2">
+          <h2 className="text-3xl font-bold mb-5">
             Deal Piles
           </h2>
 
           {game.phase === "Deal" && (
             <p className="mb-4 text-green-200">
-              Currently dealing to <strong>{RANKS[game.currentPile]}</strong>.
-              Matching cards burn two extra cards. Aces burn one extra card. An
-              Ace dealt to the Ace pile burns three cards total.
+              Currently dealing to{" "}
+              <strong>
+                {RANKS[game.currentPile]}
+              </strong>
+              .
             </p>
           )}
 
