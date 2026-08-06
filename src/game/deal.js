@@ -14,21 +14,14 @@ export const RANKS = [
   "K",
 ];
 
-
-
 export function createEmptyGame() {
-
   return {
-
     phase: "Deal",
 
     stock: [],
-
     discard: [],
 
-
     piles: {
-
       A: [],
       "2": [],
       "3": [],
@@ -42,170 +35,76 @@ export function createEmptyGame() {
       J: [],
       Q: [],
       K: [],
-
     },
-
 
     currentPile: 0,
 
-
-    ascending: [
-      [],
-      [],
-      [],
-      [],
-    ],
-
-
-    descending: [
-      [],
-      [],
-      [],
-      [],
-
-    ],
-
+    ascending: [[], [], [], []],
+    descending: [[], [], [], []],
 
     hand: [],
-
-
   };
-
 }
-
-
-
-
-
 
 function burnCard(game) {
+  if (game.stock.length === 0) return;
 
-  if (game.stock.length === 0) {
-    return;
-  }
-
-
-  const card =
-    game.stock.pop();
-
+  const card = game.stock.pop();
 
   game.discard.push({
-
     ...card,
-
     faceUp: false,
-
   });
-
 }
 
-
-
-
-
-
+function placeOnPile(game, pileRank, card) {
+  // During the deal every revealed card remains face-up on the deal pile.
+  game.piles[pileRank].push({
+    ...card,
+    faceUp: true,
+  });
+}
 
 export function dealOne(game) {
-
+  if (game.phase !== "Deal") return;
 
   if (game.stock.length === 0) {
-
     game.phase = "Play";
-
     return;
-
   }
 
+  const pileRank = RANKS[game.currentPile];
 
+  const card = game.stock.pop();
 
-  const pileRank =
-    RANKS[game.currentPile];
+  placeOnPile(game, pileRank, card);
 
+  const isAce = card.rank === "A";
+  const isMatch = card.rank === pileRank;
 
-
-  const card =
-    game.stock.pop();
-
-
-
-  // Every card goes onto the current pile
-
-  game.piles[pileRank].push(card);
-
-
-
-
-  const isAce =
-    card.rank === "A";
-
-
-
-  const isMatch =
-    card.rank === pileRank;
-
-
-
-  // Ace penalty
-
+  // Ace: always burn one card.
   if (isAce) {
-
     burnCard(game);
-
   }
 
-
-
-  // Matching rank penalty
-
+  // Correct pile: burn two additional cards.
+  // If the matching card is also an Ace this correctly burns three total.
   if (isMatch) {
-
     burnCard(game);
-
     burnCard(game);
-
   }
 
-
-
-
-  game.currentPile =
-    (
-      game.currentPile + 1
-    )
-    %
-    RANKS.length;
-
-
-
-
+  game.currentPile = (game.currentPile + 1) % RANKS.length;
 
   if (game.stock.length === 0) {
-
     game.phase = "Play";
-
   }
-
-
 }
 
-
-
-
-
-
-
 export function dealRound(game) {
+  if (game.phase !== "Deal") return;
 
-
-  for (
-    let i = 0;
-    i < 13;
-    i++
-  ) {
-
+  for (let i = 0; i < RANKS.length && game.phase === "Deal"; i++) {
     dealOne(game);
-
   }
-
-
 }
