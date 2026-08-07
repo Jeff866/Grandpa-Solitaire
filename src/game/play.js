@@ -1,26 +1,52 @@
-// Grandpa's Solitaire play rules
+// Grandpa's Solitaire play engine
 
 const ASCENDING = [
-  "A", "2", "3", "4", "5", "6", "7",
-  "8", "9", "10", "J", "Q", "K"
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
 ];
 
 const DESCENDING = [
-  "K", "Q", "J", "10", "9", "8", "7",
-  "6", "5", "4", "3", "2", "A"
+  "K",
+  "Q",
+  "J",
+  "10",
+  "9",
+  "8",
+  "7",
+  "6",
+  "5",
+  "4",
+  "3",
+  "2",
+  "A",
 ];
 
 function nextAscendingRank(pile) {
-  if (pile.length === 0) return "A";
-  return ASCENDING[pile.length];
+  return pile.length < ASCENDING.length
+    ? ASCENDING[pile.length]
+    : null;
 }
 
 function nextDescendingRank(pile) {
-  if (pile.length === 0) return "K";
-  return DESCENDING[pile.length];
+  return pile.length < DESCENDING.length
+    ? DESCENDING[pile.length]
+    : null;
 }
 
 export function legalMoves(game, card) {
+  if (!card) return [];
+
   const moves = [];
 
   game.ascending.forEach((pile, index) => {
@@ -45,27 +71,29 @@ export function legalMoves(game, card) {
 }
 
 export function hasLegalMove(game) {
-  if (game.hand.length === 0) return false;
+  if (game.hand.length === 0) {
+    return false;
+  }
 
-  return (
-    legalMoves(game, game.hand[0]).length > 0
-  );
+  return legalMoves(game, game.hand[0]).length > 0;
 }
 
 export function playCard(game, move) {
-  if (game.hand.length === 0) return false;
+  if (game.hand.length === 0) {
+    return false;
+  }
 
   const card = game.hand[0];
 
-  const allowed = legalMoves(game, card);
-
-  const legal = allowed.find(
-    (m) =>
-      m.type === move.type &&
-      m.index === move.index
+  const validMove = legalMoves(game, card).find(
+    (candidate) =>
+      candidate.type === move.type &&
+      candidate.index === move.index
   );
 
-  if (!legal) return false;
+  if (!validMove) {
+    return false;
+  }
 
   if (move.type === "ascending") {
     game.ascending[move.index].push(card);
@@ -78,13 +106,27 @@ export function playCard(game, move) {
   return true;
 }
 
-export function isVictory(game) {
+export function totalFoundationCards(game) {
   return (
-    game.ascending.every(
-      (pile) => pile.length === 13
-    ) &&
-    game.descending.every(
-      (pile) => pile.length === 13
+    game.ascending.reduce(
+      (count, pile) => count + pile.length,
+      0
+    ) +
+    game.descending.reduce(
+      (count, pile) => count + pile.length,
+      0
     )
+  );
+}
+
+export function isVictory(game) {
+  return totalFoundationCards(game) === 104;
+}
+
+export function isGameOver(game) {
+  return (
+    game.drawPile.length === 0 &&
+    game.hand.length === 0 &&
+    !hasLegalMove(game)
   );
 }
