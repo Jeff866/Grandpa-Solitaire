@@ -4,15 +4,33 @@ export default function DealPile({
   label,
   cards = [],
   onSelect,
+  playable = false,
 }) {
   const topCard =
-    cards.length > 0 ? cards[cards.length - 1] : null;
+    cards.length > 0
+      ? cards[cards.length - 1]
+      : null;
 
   return (
     <button
       type="button"
-      onClick={onSelect}
-      className="deal-pile"
+      className={[
+        "deal-pile",
+        playable
+          ? "deal-pile-playable"
+          : "",
+      ].join(" ")}
+      onClick={() => {
+        if (topCard && playable) {
+          onSelect?.(label, topCard);
+        }
+      }}
+      disabled={!topCard || !playable}
+      aria-label={
+        topCard
+          ? `${label} pile, top card ${topCard.rank}${topCard.suit}`
+          : `${label} pile empty`
+      }
     >
       <div className="deal-pile-label">
         {label}

@@ -13,35 +13,25 @@ export default function Hand({
     }
 
     /*
-     * Spread smaller hands comfortably across the panel.
-     * Larger hands automatically overlap more tightly.
+     * Spread the hand across the available width.
      *
-     * Because the cards are absolutely positioned,
-     * the hand never increases the height of the board.
-     */
-    const cardWidth = 72;
-    const sidePadding = 10;
-
-    /*
-     * Percentage spacing is capped so large hands remain
-     * inside the Active Pile.
+     * Later cards overlap earlier cards like a normal
+     * fanned hand, but each card keeps enough of its
+     * upper-left corner visible to identify rank/suit.
      */
     const maxSpread =
       count <= 7
-        ? 88
+        ? 78
         : count <= 10
-          ? 86
-          : 84;
+          ? 80
+          : 82;
 
     const position =
       (index / (count - 1)) * maxSpread;
 
     return {
-      left: `calc(${position}% + ${sidePadding}px)`,
-      transform:
-        index === 0
-          ? "none"
-          : "translateX(-50%)",
+      left: `${position}%`,
+      transform: "none",
     };
   }
 
@@ -59,19 +49,39 @@ export default function Hand({
               cards.length
             );
 
+            const isPlayableCard = index === 0;
+
             return (
               <button
                 type="button"
                 key={card.id}
-                onClick={() =>
-                  onPlayCard?.(card, index)
-                }
-                className="active-hand-card"
+                onClick={() => {
+                  if (isPlayableCard) {
+                    onPlayCard?.(card, index);
+                  }
+                }}
+                className={[
+                  "active-hand-card",
+                  isPlayableCard
+                    ? "active-hand-card-current"
+                    : "active-hand-card-waiting",
+                ].join(" ")}
                 style={{
                   left: position.left,
                   transform: position.transform,
+
+                  /*
+                   * Normal card-hand stacking:
+                   * each card to the right sits above
+                   * the card immediately before it.
+                   */
                   zIndex: index + 1,
                 }}
+                aria-label={
+                  isPlayableCard
+                    ? `Current card ${card.rank}${card.suit}`
+                    : `${card.rank}${card.suit} waiting`
+                }
               >
                 <PlayingCard
                   rank={card.rank}
@@ -89,7 +99,13 @@ export default function Hand({
 
       {cards.length > 0 && (
         <div className="active-hand-count">
-          {cards.length} cards
+          Current card:{" "}
+          <strong>
+            {cards[0].rank}
+            {cards[0].suit}
+          </strong>
+          {" · "}
+          {cards.length} cards remaining
         </div>
       )}
     </section>

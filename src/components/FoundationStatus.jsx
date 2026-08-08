@@ -1,18 +1,27 @@
 import PlayingCard from "./PlayingCard";
-import { FOUNDATION_SUITS, legalMoves } from "../game/play";
+import {
+  FOUNDATION_SUITS,
+  legalMoves,
+} from "../game/play";
 
 export default function FoundationStatus({
   ascending,
   descending,
-  hand = [],
   game,
+  selectedCard = null,
   onPlay,
 }) {
-  const currentCard = hand.length > 0 ? hand[0] : null;
-  const moves = currentCard && game ? legalMoves(game, currentCard) : [];
+  const moves =
+    selectedCard && game
+      ? legalMoves(game, selectedCard)
+      : [];
 
   function isLegal(type, index) {
-    return moves.some((m) => m.type === type && m.index === index);
+    return moves.some(
+      (move) =>
+        move.type === type &&
+        move.index === index
+    );
   }
 
   function foundationClass(active) {
@@ -27,21 +36,50 @@ export default function FoundationStatus({
 
   function renderSlot(type, pile, index) {
     const suit = FOUNDATION_SUITS[index];
+
     const active = isLegal(type, index);
-    const topCard = pile[pile.length - 1];
-    const ascendingType = type === "ascending";
+
+    const topCard =
+      pile[pile.length - 1];
+
+    const ascendingType =
+      type === "ascending";
 
     return (
       <button
+        type="button"
         key={`${type}-${suit}`}
         disabled={!active}
-        onClick={() => onPlay?.({ type, index })}
+        onClick={() => {
+          if (active) {
+            onPlay?.({
+              type,
+              index,
+            });
+          }
+        }}
         className={foundationClass(active)}
-        aria-label={`${suit} ${ascendingType ? "ascending" : "descending"} foundation`}
+        aria-label={`${suit} ${
+          ascendingType
+            ? "ascending"
+            : "descending"
+        } foundation`}
       >
         <div className="foundation-label">
-          <span>{ascendingType ? "▲ A→K" : "▼ K→A"}</span>
-          <span className={suit === "♥" || suit === "♦" ? "text-red-500" : "text-white"}>
+          <span>
+            {ascendingType
+              ? "▲ A→K"
+              : "▼ K→A"}
+          </span>
+
+          <span
+            className={
+              suit === "♥" ||
+              suit === "♦"
+                ? "text-red-500"
+                : "text-white"
+            }
+          >
             {suit}
           </span>
         </div>
@@ -49,10 +87,19 @@ export default function FoundationStatus({
         <div className="foundation-card-space">
           {topCard ? (
             <div className="foundation-card-wrap">
-              <PlayingCard rank={topCard.rank} suit={topCard.suit} red={topCard.red} />
+              <PlayingCard
+                rank={topCard.rank}
+                suit={topCard.suit}
+                red={
+                  topCard.suit === "♥" ||
+                  topCard.suit === "♦"
+                }
+              />
             </div>
           ) : (
-            <div className="foundation-empty">{suit}</div>
+            <div className="foundation-empty">
+              {suit}
+            </div>
           )}
         </div>
       </button>
@@ -62,16 +109,30 @@ export default function FoundationStatus({
   return (
     <div className="foundation-board">
       <div className="foundation-title-row">
-        <h2 className="text-2xl font-bold">Foundations</h2>
-        <span className="text-green-200">♥ Hearts · ♦ Diamonds · ♣ Clubs · ♠ Spades</span>
+        <h2>Foundations</h2>
+
+        <div>
+          ♥ Hearts · ♦ Diamonds · ♣ Clubs · ♠ Spades
+        </div>
       </div>
 
       <div className="foundation-grid">
-        {FOUNDATION_SUITS.map((_, index) =>
-          renderSlot("ascending", ascending[index], index)
+        {FOUNDATION_SUITS.map(
+          (_, index) =>
+            renderSlot(
+              "ascending",
+              ascending[index],
+              index
+            )
         )}
-        {FOUNDATION_SUITS.map((_, index) =>
-          renderSlot("descending", descending[index], index)
+
+        {FOUNDATION_SUITS.map(
+          (_, index) =>
+            renderSlot(
+              "descending",
+              descending[index],
+              index
+            )
         )}
       </div>
     </div>

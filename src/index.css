@@ -287,29 +287,24 @@ button {
   font-size: 0.85rem;
 }
 
+/*
+ * Active cards are intentionally overlapped.
+ * Later cards sit above earlier cards so that the
+ * upper-left rank/suit of every card stays visible.
+ */
 .active-hand-card {
   position: absolute;
-  top: 10px;
+  top: 12px;
   width: 72px;
   height: 101px;
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
-  transform: translateX(-50%);
+  cursor: default;
   transition:
     top 120ms ease,
     transform 120ms ease;
-}
-
-.active-hand-card:first-child {
-  transform: translateX(0);
-}
-
-.active-hand-card:hover {
-  top: 2px;
-  z-index: 100 !important;
 }
 
 .active-hand-card > div {
@@ -329,6 +324,43 @@ button {
 
 .active-hand-card .p-2 {
   padding: 4px;
+}
+
+/* Current playable card */
+
+.active-hand-card-current {
+  cursor: pointer;
+}
+
+/*
+ * The yellow outline identifies the current card.
+ * It does not change the stacking order of the hand.
+ */
+.active-hand-card-current > div {
+  outline: 3px solid #fde047;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 10px rgba(253, 224, 71, 0.6);
+}
+
+/*
+ * Do not raise the current card above the other cards.
+ * Raising its z-index would cover the identifying
+ * corners of the cards waiting behind it.
+ */
+.active-hand-card-current:hover {
+  top: 6px;
+}
+
+/* Cards waiting behind the current card */
+
+.active-hand-card-waiting {
+  cursor: default;
+}
+
+.active-hand-card-waiting:hover {
+  top: 12px;
 }
 
 .active-hand-count {

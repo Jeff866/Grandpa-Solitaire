@@ -14,17 +14,23 @@ import {
   createEmptyGame,
   dealOne,
   dealRound,
-  drawCard,
+  pickUpActivePile,
+  finishActivePile,
   RANKS,
 } from "./game/deal";
 
 import {
+  legalMoves,
   playCard,
+  playDealPileCard,
   isVictory,
 } from "./game/play";
 
 export default function App() {
   const [won, setWon] = useState(false);
+
+  const [selectedSource, setSelectedSource] =
+    useState(null);
 
   const [game, setGame] = useState(() => {
     const fresh = createEmptyGame();
@@ -37,6 +43,7 @@ export default function App() {
     fresh.stock = shuffle(createDeck());
 
     setWon(false);
+    setSelectedSource(null);
     setGame(fresh);
   }
 
@@ -55,39 +62,141 @@ export default function App() {
         ])
       ),
 
-      ascending: game.ascending.map((pile) => [...pile]),
-      descending: game.descending.map((pile) => [...pile]),
+      ascending: game.ascending.map(
+        (pile) => [...pile]
+      ),
+
+      descending: game.descending.map(
+        (pile) => [...pile]
+      ),
 
       hand: [...game.hand],
+
+      activeDiscard: game.activeDiscard
+        ? { ...game.activeDiscard }
+        : null,
     };
   }
 
   function updateGame(action) {
     const updated = cloneGame();
+
     action(updated);
+
     setGame(updated);
   }
 
-  function handlePlay(move) {
+  const activeHandCard =
+    game.hand.length > 0
+      ? game.hand[0]
+      : null;
+
+  const selectedDealCard =
+    selectedSource?.type === "deal"
+      ? game.piles[
+          selectedSource.rank
+        ]?.[
+          game.piles[selectedSource.rank]
+            .length - 1
+        ] || null
+      : null;
+
+  const selectedCard =
+    selectedDealCard || activeHandCard;
+
+  function handleDealPileSelect(
+    rank,
+    card
+  ) {
+    if (game.phase !== "Play") return;
+
+    if (!card) return;
+
+    const moves = legalMoves(game, card);
+
+    if (moves.length === 0) {
+      setSelectedSource(null);
+      return;
+    }
+
+    setSelectedSource({
+      type: "deal",
+      rank,
+    });
+  }
+
+  function handleFoundationPlay(move) {
     updateGame((updated) => {
-      const success = playCard(updated, move);
+      let success = false;
+
+      if (
+        selectedSource?.type === "deal"
+      ) {
+        success = playDealPileCard(
+          updated,
+          selectedSource.rank,
+          move
+        );
+      } else {
+        success = playCard(
+          updated,
+          move
+        );
+      }
 
       if (!success) return;
-
-      drawCard(updated);
 
       if (isVictory(updated)) {
         setWon(true);
       }
     });
+
+    setSelectedSource(null);
   }
+
+  function handlePickUpActivePile() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      pickUpActivePile(updated);
+    });
+  }
+
+  function handleFinishActivePile() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      finishActivePile(updated);
+    });
+  }
+
+  function handleDealOne() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      dealOne(updated);
+    });
+  }
+
+  function handleDealRound() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      dealRound(updated);
+    });
+  }
+
+  const playDiscard =
+    game.activeDiscard
+      ? [game.activeDiscard]
+      : [];
 
   return (
     <div className="game-shell">
       <Header
         onNewGame={newGame}
-        onDealOne={() => updateGame(dealOne)}
-        onDealRound={() => updateGame(dealRound)}
+        onDealOne={handleDealOne}
+        onDealRound={handleDealRound}
       />
 
       <main className="game-main">
@@ -97,18 +206,23 @@ export default function App() {
             stock={
               game.phase === "Deal"
                 ? game.stock.length
-                : game.drawPile.length
+                : game.drawPile.length +
+                  (game.activeDiscard
+                    ? 1
+                    : 0)
             }
             discard={
               game.phase === "Deal"
                 ? game.discard
-                : game.drawPile
+                : playDiscard
             }
             hand={game.hand}
             nextRank={
               game.phase === "Deal"
-                ? RANKS[game.currentPile]
-                : null
+                ? RANKS[
+                    game.currentPile
+                  ]
+                : game.activeRank || ""
             }
           />
 
@@ -126,20 +240,58 @@ export default function App() {
               <p>
                 Dealing to{" "}
                 <strong>
-                  {RANKS[game.currentPile]}
+                  {
+                    RANKS[
+                      game.currentPile
+                    ]
+                  }
                 </strong>
               </p>
             )}
+
+            {game.phase === "Play" &&
+              game.activeRank && (
+                <p>
+                  Active rank:{" "}
+                  <strong>
+                    {game.activeRank}
+                  </strong>
+                </p>
+              )}
           </div>
 
           <div className="deal-piles-row">
-            {RANKS.map((rank) => (
-              <DealPile
-                key={rank}
-                label={rank}
-                cards={game.piles[rank]}
-              />
-            ))}
+            {RANKS.map((rank) => {
+              const pile =
+                game.piles[rank];
+
+              const topCard =
+                pile.length > 0
+                  ? pile[
+                      pile.length - 1
+                    ]
+                  : null;
+
+              const playable =
+                game.phase === "Play" &&
+                topCard &&
+                legalMoves(
+                  game,
+                  topCard
+                ).length > 0;
+
+              return (
+                <DealPile
+                  key={rank}
+                  label={rank}
+                  cards={pile}
+                  playable={playable}
+                  onSelect={
+                    handleDealPileSelect
+                  }
+                />
+              );
+            })}
           </div>
         </section>
 
@@ -154,7 +306,7 @@ export default function App() {
               discard={
                 game.phase === "Deal"
                   ? game.discard
-                  : game.drawPile
+                  : playDiscard
               }
             />
 
@@ -162,38 +314,116 @@ export default function App() {
               <div className="play-controls">
                 <h2>Active Play</h2>
 
+                {game.activeDiscard ? (
+                  <p>
+                    <strong>
+                      {
+                        game
+                          .activeDiscard
+                          .rank
+                      }
+                      {
+                        game
+                          .activeDiscard
+                          .suit
+                      }
+                    </strong>{" "}
+                    selects the{" "}
+                    <strong>
+                      {game.activeRank}
+                    </strong>{" "}
+                    pile.
+                  </p>
+                ) : game.hand.length >
+                  0 ? (
+                  <p>
+                    Playing the{" "}
+                    <strong>
+                      {game.activeRank}
+                    </strong>{" "}
+                    pile.
+                  </p>
+                ) : (
+                  <p>
+                    No selector card
+                    remaining.
+                  </p>
+                )}
+
                 <p>
-                  Draw pile remaining:{" "}
-                  <strong>{game.drawPile.length}</strong>
+                  Selector cards
+                  remaining:{" "}
+                  <strong>
+                    {
+                      game.drawPile
+                        .length
+                    }
+                  </strong>
                 </p>
 
                 <button
                   type="button"
-                  onClick={() => updateGame(drawCard)}
+                  onClick={
+                    handlePickUpActivePile
+                  }
                   disabled={
-                    game.drawPile.length === 0 ||
+                    !game.activeRank ||
+                    !game.activeDiscard ||
                     game.hand.length > 0
                   }
                 >
-                  Draw Card
+                  Pick Up{" "}
+                  {game.activeRank || ""}{" "}
+                  Pile
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    handleFinishActivePile
+                  }
+                  disabled={
+                    !game.activeRank ||
+                    game.hand.length === 0
+                  }
+                  style={{
+                    marginLeft: "6px",
+                  }}
+                >
+                  Finish Active Pile
                 </button>
               </div>
             )}
           </section>
 
           <section className="active-panel">
-            <h2>Active Pile</h2>
+            <h2>
+              Active Pile
+              {game.activeRank
+                ? ` — ${game.activeRank}`
+                : ""}
+            </h2>
 
-            <Hand cards={game.hand} />
+            <Hand
+              cards={game.hand}
+            />
           </section>
 
           <section className="foundation-panel">
             <FoundationStatus
-              ascending={game.ascending}
-              descending={game.descending}
-              hand={game.hand}
+              ascending={
+                game.ascending
+              }
+              descending={
+                game.descending
+              }
               game={game}
-              onPlay={handlePlay}
+              selectedCard={
+                selectedCard
+              }
+              onPlay={
+                handleFoundationPlay
+              }
             />
           </section>
         </div>
