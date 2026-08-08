@@ -158,6 +158,16 @@ export default function App() {
 
     if (!card) return;
 
+    const alreadySelected =
+      selectedSource?.type ===
+        "deal" &&
+      selectedSource.rank === rank;
+
+    if (alreadySelected) {
+      setSelectedSource(null);
+      return;
+    }
+
     const moves =
       legalMoves(game, card);
 
@@ -185,9 +195,23 @@ export default function App() {
     if (!card) return;
 
     /*
-     * Selecting a card does not play it.
-     * It simply makes that card the source
-     * used by FoundationStatus.
+     * Clicking the currently selected card
+     * again deselects it.
+     */
+    const alreadySelected =
+      selectedSource?.type ===
+        "hand" &&
+      selectedSource.index === index;
+
+    if (alreadySelected) {
+      setSelectedSource(null);
+      return;
+    }
+
+    /*
+     * Otherwise select this specific card.
+     * It does not move until a legal
+     * foundation is clicked.
      */
     setSelectedSource({
       type: "hand",
