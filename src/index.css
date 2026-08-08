@@ -2,96 +2,334 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
-    width:100%;
-    height:100%;
-    margin:0;
+  width: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  margin: 0;
 }
 
-body{
-    background:
-        radial-gradient(circle at top,#2d7f46,#0d4d2a);
-    font-family:Georgia,serif;
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top, #2d7f46, #0d4d2a);
+  font-family: Georgia, serif;
+  color: white;
 }
-/* Fixed foundation board: the eight locations never resize or change suits. */
+
+button {
+  font-family: inherit;
+}
+
+/* =========================================================
+   MAIN GAME BOARD
+   ========================================================= */
+
+.game-shell {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.game-main {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 12px 18px 24px;
+}
+
+.game-info-row {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* =========================================================
+   DEAL PILES
+   All 13 ranks remain in one horizontal desktop row.
+   ========================================================= */
+
+.deal-section {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.deal-section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.deal-section-heading h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.deal-section-heading p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #bbf7d0;
+}
+
+.deal-piles-row {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(58px, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+
+.deal-pile {
+  min-width: 0;
+  padding: 5px;
+  border: 1px solid rgba(134, 239, 172, 0.55);
+  border-radius: 8px;
+  background: rgba(22, 101, 52, 0.72);
+  color: white;
+  cursor: pointer;
+}
+
+.deal-pile:hover {
+  background: rgba(21, 128, 61, 0.9);
+}
+
+.deal-pile-label {
+  margin-bottom: 4px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.deal-pile-card-area {
+  width: 100%;
+  max-width: 78px;
+  aspect-ratio: 2.5 / 3.5;
+  margin: 0 auto;
+}
+
+.deal-pile-card-area > div {
+  width: 100%;
+  height: 100%;
+}
+
+.deal-pile-empty {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(134, 239, 172, 0.65);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbf7d0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.deal-pile-count {
+  margin-top: 3px;
+  text-align: center;
+  color: #bbf7d0;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+/* Keep PlayingCard typography proportional inside compact deal piles. */
+
+.deal-pile-card-area .text-xl {
+  font-size: 0.82rem;
+  line-height: 1rem;
+}
+
+.deal-pile-card-area .text-5xl {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.deal-pile-card-area .p-2 {
+  padding: 5px;
+}
+
+/* =========================================================
+   LOWER BOARD
+   Stock / Active Pile / Foundations
+   ========================================================= */
+
+.lower-board {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.75fr) minmax(220px, 1fr) minmax(560px, 2.4fr);
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.stock-panel,
+.active-panel,
+.foundation-panel {
+  min-width: 0;
+}
+
+.stock-panel,
+.active-panel {
+  padding: 10px;
+  border: 1px solid rgba(134, 239, 172, 0.4);
+  border-radius: 10px;
+  background: rgba(20, 83, 45, 0.45);
+}
+
+.active-panel h2,
+.play-controls h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.play-controls {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(134, 239, 172, 0.35);
+}
+
+.play-controls p {
+  margin: 0 0 8px;
+  color: #bbf7d0;
+  font-size: 0.8rem;
+}
+
+.play-controls button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #34d399;
+  color: #052e16;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.play-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* =========================================================
+   FIXED FOUNDATION BOARD
+   Fixed columns:
+   Hearts / Diamonds / Clubs / Spades
+   Ascending row + Descending row
+   ========================================================= */
+
 .foundation-board {
-    width: 100%;
-    min-width: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .foundation-title-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.foundation-title-row h2 {
+  margin: 0;
+  font-size: 1.15rem;
 }
 
 .foundation-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(2, 230px);
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(105px, 1fr));
+  grid-template-rows: repeat(2, 164px);
+  gap: 7px;
 }
 
 .foundation-slot {
-    box-sizing: border-box;
-    width: 100%;
-    height: 230px;
-    min-width: 0;
-    padding: 0.75rem;
-    overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  height: 164px;
+  min-width: 0;
+  padding: 6px;
+  overflow: hidden;
 }
 
 .foundation-label {
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-weight: 700;
-    white-space: nowrap;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .foundation-card-space {
-    height: 174px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .foundation-card-wrap {
-    width: 96px;
-    height: 134px;
+  width: 78px;
+  height: 109px;
 }
 
 .foundation-card-wrap > div {
-    width: 96px;
-    height: 134px;
+  width: 78px;
+  height: 109px;
 }
 
 .foundation-empty {
-    width: 96px;
-    height: 134px;
-    border: 2px dashed rgb(134 239 172);
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: rgb(187 247 208);
+  width: 78px;
+  height: 109px;
+  border: 2px dashed rgb(134 239 172);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.55rem;
+  color: rgb(187 247 208);
+}
+
+.foundation-card-wrap .text-xl {
+  font-size: 0.82rem;
+  line-height: 1rem;
+}
+
+.foundation-card-wrap .text-5xl {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.foundation-card-wrap .p-2 {
+  padding: 5px;
+}
+
+/* =========================================================
+   RESPONSIVE FALLBACK
+   Desktop remains the primary Grandpa's Solitaire layout.
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .game-main {
+    min-width: 1000px;
+  }
+
+  body {
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 800px) {
-    .foundation-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: none;
-    }
-
-    .foundation-title-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
+  .foundation-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

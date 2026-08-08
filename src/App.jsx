@@ -83,97 +83,56 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-green-900 text-white">
+    <div className="game-shell">
       <Header
         onNewGame={newGame}
         onDealOne={() => updateGame(dealOne)}
         onDealRound={() => updateGame(dealRound)}
       />
 
-      <main className="max-w-7xl mx-auto p-8">
-        <StatusBar
-          phase={game.phase}
-          stock={
-            game.phase === "Deal"
-              ? game.stock.length
-              : game.drawPile.length
-          }
-          discard={
-            game.phase === "Deal"
-              ? game.discard
-              : game.drawPile
-          }
-          hand={game.hand}
-          nextRank={
-            game.phase === "Deal"
-              ? RANKS[game.currentPile]
-              : null
-          }
-        />
+      <main className="game-main">
+        <div className="game-info-row">
+          <StatusBar
+            phase={game.phase}
+            stock={
+              game.phase === "Deal"
+                ? game.stock.length
+                : game.drawPile.length
+            }
+            discard={
+              game.phase === "Deal"
+                ? game.discard
+                : game.drawPile
+            }
+            hand={game.hand}
+            nextRank={
+              game.phase === "Deal"
+                ? RANKS[game.currentPile]
+                : null
+            }
+          />
 
-        <GameMessage
-          phase={game.phase}
-          won={won}
-        />
+          <GameMessage
+            phase={game.phase}
+            won={won}
+          />
+        </div>
 
-        <StockArea
-          stock={
-            game.phase === "Deal"
-              ? game.stock.length
-              : game.drawPile.length
-          }
-          discard={
-            game.phase === "Deal"
-              ? game.discard
-              : game.drawPile
-          }
-        />
+        <section className="deal-section">
+          <div className="deal-section-heading">
+            <h2>Deal Piles</h2>
 
-        {game.phase === "Play" && (
-          <section className="mt-6 rounded-xl border border-green-700 bg-green-800/40 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">
-                  Play Phase
-                </h2>
+            {game.phase === "Deal" && (
+              <p>
+                Dealing to{" "}
+                <strong>
+                  {RANKS[game.currentPile]}
+                </strong>
+              </p>
+            )}
+          </div>
 
-                <p className="text-green-200 mt-1">
-                  The discard pile has been flipped and is now
-                  the draw pile.
-                </p>
-              </div>
-
-              <button
-                onClick={() => updateGame(drawCard)}
-                disabled={
-                  game.drawPile.length === 0 ||
-                  game.hand.length > 0
-                }
-                className="rounded-lg bg-emerald-400 px-5 py-3 font-semibold text-black disabled:opacity-40"
-              >
-                Draw Card
-              </button>
-            </div>
-
-            <div className="mt-4 text-sm text-green-200">
-              Draw pile remaining: {game.drawPile.length}
-            </div>
-          </section>
-        )}
-
-        <section className="mt-10">
-          <h2 className="text-3xl font-bold mb-5">
-            Deal Piles
-          </h2>
-
-          {game.phase === "Deal" && (
-            <p className="mb-4 text-green-200">
-              Currently dealing to{" "}
-              <strong>{RANKS[game.currentPile]}</strong>
-            </p>
-          )}
-
-          <div className="grid grid-cols-7 gap-4">
+          <div className="deal-piles-row">
             {RANKS.map((rank) => (
               <DealPile
                 key={rank}
@@ -184,17 +143,60 @@ export default function App() {
           </div>
         </section>
 
-        <section className="mt-10">
-          <FoundationStatus
-            ascending={game.ascending}
-            descending={game.descending}
-            hand={game.hand}
-            game={game}
-            onPlay={handlePlay}
-          />
-        </section>
+        <div className="lower-board">
+          <section className="stock-panel">
+            <StockArea
+              stock={
+                game.phase === "Deal"
+                  ? game.stock.length
+                  : game.drawPile.length
+              }
+              discard={
+                game.phase === "Deal"
+                  ? game.discard
+                  : game.drawPile
+              }
+            />
 
-        <Hand cards={game.hand} />
+            {game.phase === "Play" && (
+              <div className="play-controls">
+                <h2>Active Play</h2>
+
+                <p>
+                  Draw pile remaining:{" "}
+                  <strong>{game.drawPile.length}</strong>
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => updateGame(drawCard)}
+                  disabled={
+                    game.drawPile.length === 0 ||
+                    game.hand.length > 0
+                  }
+                >
+                  Draw Card
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className="active-panel">
+            <h2>Active Pile</h2>
+
+            <Hand cards={game.hand} />
+          </section>
+
+          <section className="foundation-panel">
+            <FoundationStatus
+              ascending={game.ascending}
+              descending={game.descending}
+              hand={game.hand}
+              game={game}
+              onPlay={handlePlay}
+            />
+          </section>
+        </div>
       </main>
     </div>
   );
