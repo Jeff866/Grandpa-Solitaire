@@ -246,11 +246,97 @@ button {
   background: rgba(20, 83, 45, 0.45);
 }
 
+.active-panel {
+  height: 294px;
+  overflow: hidden;
+}
+
 .active-panel h2,
 .play-controls h2 {
   margin-top: 0;
   margin-bottom: 4px;
   font-size: 0.95rem;
+}
+
+/* ACTIVE PILE / HAND */
+
+.active-hand {
+  width: 100%;
+  height: 255px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.active-hand-area {
+  position: relative;
+  width: 100%;
+  height: 225px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 7px;
+  background: rgba(22, 101, 52, 0.72);
+}
+
+.active-hand-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbf7d0;
+  font-size: 0.85rem;
+}
+
+.active-hand-card {
+  position: absolute;
+  top: 10px;
+  width: 72px;
+  height: 101px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition:
+    top 120ms ease,
+    transform 120ms ease;
+}
+
+.active-hand-card:first-child {
+  transform: translateX(0);
+}
+
+.active-hand-card:hover {
+  top: 2px;
+  z-index: 100 !important;
+}
+
+.active-hand-card > div {
+  width: 72px;
+  height: 101px;
+}
+
+.active-hand-card .text-xl {
+  font-size: 0.78rem;
+  line-height: 0.9rem;
+}
+
+.active-hand-card .text-5xl {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.active-hand-card .p-2 {
+  padding: 4px;
+}
+
+.active-hand-count {
+  height: 24px;
+  padding-top: 5px;
+  text-align: center;
+  color: #bbf7d0;
+  font-size: 0.72rem;
 }
 
 /* STOCK & DISCARD */
