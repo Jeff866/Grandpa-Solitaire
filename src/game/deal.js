@@ -20,10 +20,10 @@ export function createEmptyGame() {
 
     stock: [],
 
-    // Face-down during the deal.
+    // Face-down during Deal.
     discard: [],
 
-    // Created when dealing is complete.
+    // Becomes the selector pile during Play.
     drawPile: [],
 
     piles: {
@@ -47,7 +47,16 @@ export function createEmptyGame() {
     ascending: [[], [], [], []],
     descending: [[], [], [], []],
 
+    // Cards temporarily picked up from the selected rank pile.
+    // The exposed selector card is added to this hand when
+    // the active pile is picked up.
     hand: [],
+
+    // Rank selected by the currently exposed discard card.
+    activeRank: null,
+
+    // Currently exposed selector card.
+    activeDiscard: null,
   };
 }
 
@@ -73,21 +82,141 @@ function beginPlay(game) {
 
   game.discard = [];
   game.phase = "Play";
+  game.activeRank = null;
+  game.activeDiscard = null;
+  game.hand = [];
+
+  revealNextDiscard(game);
 }
 
-export function drawCard(game) {
-  if (game.phase !== "Play") return;
+/*
+ * Reveal the next selector card.
+ *
+ * The selector card remains represented by activeDiscard
+ * until its selected rank pile is picked up.
+ *
+ * Its rank determines which deal pile becomes active.
+ */
+export function revealNextDiscard(game) {
+  if (game.phase !== "Play") return false;
 
-  if (game.hand.length > 0) return;
+  if (game.hand.length > 0) return false;
 
-  if (game.drawPile.length === 0) return;
+  if (game.activeDiscard) return false;
+
+  if (game.drawPile.length === 0) {
+    game.activeRank = null;
+    return false;
+  }
 
   const card = game.drawPile.pop();
 
-  game.hand.push({
+  game.activeDiscard = {
     ...card,
     faceUp: true,
-  });
+  };
+
+  game.activeRank = card.rank;
+
+  return true;
+}
+
+/*
+ * Pick up the entire rank pile selected by activeDiscard.
+ *
+ * The exposed selector card ALSO becomes part of the hand.
+ *
+ * Existing rank-pile order is preserved.
+ * The selector is placed at the end of the hand so that,
+ * if it is not played, it becomes the TOP card when the
+ * hand is returned to the rank pile.
+ */
+export function pickUpActivePile(game) {
+  if (game.phase !== "Play") return false;
+
+  if (!game.activeRank || !game.activeDiscard) {
+    return false;
+  }
+
+  if (game.hand.length > 0) return false;
+
+  const cards = game.piles[game.activeRank];
+
+  if (!cards) return false;
+
+  const pileCards = cards.map((card) => ({
+    ...card,
+    faceUp: true,
+  }));
+
+  const selectorCard = {
+    ...game.activeDiscard,
+    faceUp: true,
+  };
+
+  game.hand = [
+    ...pileCards,
+    selectorCard,
+  ];
+
+  game.piles[game.activeRank] = [];
+
+  // The selector is no longer sitting separately in Discard.
+  // It is now physically part of the active hand.
+  game.activeDiscard = null;
+
+  return true;
+}
+
+/*
+ * Finish the current active pile.
+ *
+ * Any unplayed cards go back to their selected rank pile
+ * in their current order.
+ *
+ * Because the selector was appended to the hand when the
+ * pile was picked up, an unplayed selector naturally becomes
+ * the top card of the returned pile.
+ *
+ * The top card is always face up so it can be played later.
+ *
+ * After the pile is returned, reveal the next selector.
+ */
+export function finishActivePile(game) {
+  if (game.phase !== "Play") return false;
+
+  if (!game.activeRank) {
+    return false;
+  }
+
+  if (game.hand.length > 0) {
+    game.piles[game.activeRank] = game.hand.map(
+      (card, index) => ({
+        ...card,
+        faceUp: index === game.hand.length - 1,
+      })
+    );
+  } else {
+    game.piles[game.activeRank] = [];
+  }
+
+  game.hand = [];
+  game.activeRank = null;
+  game.activeDiscard = null;
+
+  revealNextDiscard(game);
+
+  return true;
+}
+
+/*
+ * Compatibility wrapper.
+ *
+ * In Play, "draw" means pick up the rank pile selected
+ * by the currently exposed selector card.
+ */
+export function drawCard(game) {
+  return pickUpActivePile(game);
 }
 
 export function dealOne(game) {
@@ -110,18 +239,16 @@ export function dealOne(game) {
   const isAce = card.rank === "A";
   const isMatch = card.rank === pileRank;
 
-  // Every Ace sends one additional card face-down
-  // to the discard pile.
+  // Every Ace sends one extra card face-down to Discard.
   if (isAce) {
     burnCard(game);
   }
 
-  // A card matching the rank pile where it was dealt
-  // sends two additional cards face-down to discard.
+  // Every card dealt onto its matching rank pile sends
+  // two extra cards face-down to Discard.
   //
-  // Therefore, an Ace dealt to the Ace pile sends
-  // three cards total to discard:
-  // 1 for being an Ace + 2 for matching the pile.
+  // Ace on Ace therefore sends three:
+  // +1 for Ace and +2 for matching its pile.
   if (isMatch) {
     burnCard(game);
     burnCard(game);
@@ -149,11 +276,7 @@ export function dealRound(game) {
   }
 
   // Completing a full A-through-K round sends
-  // one additional card face-down to discard.
-  //
-  // Only do this when the entire 13-pile round
-  // actually completed and the game is still
-  // in the Deal phase.
+  // one additional card face-down to Discard.
   if (
     game.phase === "Deal" &&
     game.currentPile === startingPile
