@@ -5,45 +5,23 @@ export default function StatusBar({
   hand = [],
   nextRank = "",
 }) {
-
   return (
-
-    <div className="bg-green-800 rounded-xl p-4 shadow mb-8 flex justify-between">
-
+    <div className="status-bar">
       <div>
-        Phase:
-        <strong className="ml-2">
-          {phase}
-        </strong>
+        Phase: <strong>{phase}</strong>
       </div>
 
-
       <div>
-        Stock:
-        <strong className="ml-2">
-          {stock}
-        </strong>
+        Stock: <strong>{stock}</strong>
       </div>
 
-
       <div>
-        Discard:
-        <strong className="ml-2">
-          {discard.length}
-        </strong>
+        Discard: <strong>{discard.length}</strong>
       </div>
 
-
       <div>
-        Next:
-        <strong className="ml-2">
-          {nextRank}
-        </strong>
+        Next: <strong>{nextRank}</strong>
       </div>
-
-
     </div>
-
   );
-
 }

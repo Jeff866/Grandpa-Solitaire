@@ -17,8 +17,7 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top, #2d7f46, #0d4d2a);
+  background: radial-gradient(circle at top, #2d7f46, #0d4d2a);
   font-family: Georgia, serif;
   color: white;
 }
@@ -27,9 +26,58 @@ button {
   font-family: inherit;
 }
 
-/* =========================================================
-   MAIN GAME BOARD
-   ========================================================= */
+/* HEADER */
+
+.game-header {
+  width: 100%;
+  min-height: 66px;
+  padding: 7px 24px;
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) auto minmax(180px, 1fr);
+  align-items: center;
+  gap: 18px;
+  background: #8b3a0a;
+  border-bottom: 3px solid #c65a08;
+}
+
+.game-header-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.game-header-brand h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.game-header-brand span {
+  color: #bbf7d0;
+  font-size: 0.9rem;
+}
+
+.game-header-deal-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.game-header-new {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.game-header button {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  font-size: 0.95rem;
+}
+
+/* MAIN BOARD */
 
 .game-shell {
   width: 100%;
@@ -40,55 +88,72 @@ button {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 12px 18px 24px;
+  padding: 6px 18px 10px;
 }
 
 .game-info-row {
   width: 100%;
-  margin-bottom: 10px;
+  margin: 0 0 4px;
 }
 
-/* =========================================================
-   DEAL PILES
-   All 13 ranks remain in one horizontal desktop row.
-   ========================================================= */
+/* STATUS */
+
+.status-bar {
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-radius: 9px;
+  background: rgba(22, 101, 52, 0.9);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  font-size: 0.92rem;
+}
+
+.status-bar strong {
+  margin-left: 4px;
+}
+
+/* DEAL PILES */
 
 .deal-section {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .deal-section-heading {
   display: flex;
   align-items: baseline;
-  gap: 18px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 4px;
 }
 
 .deal-section-heading h2 {
   margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.2;
+  font-size: 1.1rem;
+  line-height: 1.1;
 }
 
 .deal-section-heading p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #bbf7d0;
 }
 
 .deal-piles-row {
   display: grid;
   grid-template-columns: repeat(13, minmax(58px, 1fr));
-  gap: 6px;
+  gap: 5px;
   width: 100%;
 }
 
 .deal-pile {
   min-width: 0;
-  padding: 5px;
+  padding: 3px;
   border: 1px solid rgba(134, 239, 172, 0.55);
-  border-radius: 8px;
+  border-radius: 7px;
   background: rgba(22, 101, 52, 0.72);
   color: white;
   cursor: pointer;
@@ -99,16 +164,16 @@ button {
 }
 
 .deal-pile-label {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   line-height: 1;
 }
 
 .deal-pile-card-area {
   width: 100%;
-  max-width: 78px;
+  max-width: 66px;
   aspect-ratio: 2.5 / 3.5;
   margin: 0 auto;
 }
@@ -122,51 +187,49 @@ button {
   width: 100%;
   height: 100%;
   border: 2px dashed rgba(134, 239, 172, 0.65);
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #bbf7d0;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
 }
 
 .deal-pile-count {
-  margin-top: 3px;
+  margin-top: 2px;
   text-align: center;
   color: #bbf7d0;
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   line-height: 1;
 }
 
-/* Keep PlayingCard typography proportional inside compact deal piles. */
-
 .deal-pile-card-area .text-xl {
-  font-size: 0.82rem;
-  line-height: 1rem;
+  font-size: 0.74rem;
+  line-height: 0.85rem;
 }
 
 .deal-pile-card-area .text-5xl {
-  font-size: 2rem;
+  font-size: 1.7rem;
   line-height: 1;
 }
 
 .deal-pile-card-area .p-2 {
-  padding: 5px;
+  padding: 4px;
 }
 
-/* =========================================================
-   LOWER BOARD
-   Stock / Active Pile / Foundations
-   ========================================================= */
+/* LOWER BOARD */
 
 .lower-board {
   display: grid;
-  grid-template-columns: minmax(170px, 0.75fr) minmax(220px, 1fr) minmax(560px, 2.4fr);
-  gap: 12px;
+  grid-template-columns:
+    minmax(170px, 0.75fr)
+    minmax(220px, 1fr)
+    minmax(560px, 2.4fr);
+  gap: 8px;
   align-items: start;
   width: 100%;
-  margin-top: 14px;
+  margin-top: 6px;
 }
 
 .stock-panel,
@@ -177,34 +240,40 @@ button {
 
 .stock-panel,
 .active-panel {
-  padding: 10px;
+  padding: 6px;
   border: 1px solid rgba(134, 239, 172, 0.4);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(20, 83, 45, 0.45);
+}
+
+.stock-panel h2,
+.active-panel h2,
+.play-controls h2 {
+  margin-top: 0;
 }
 
 .active-panel h2,
 .play-controls h2 {
-  margin: 0 0 8px;
-  font-size: 1.1rem;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
 }
 
 .play-controls {
-  margin-top: 10px;
-  padding-top: 8px;
+  margin-top: 5px;
+  padding-top: 5px;
   border-top: 1px solid rgba(134, 239, 172, 0.35);
 }
 
 .play-controls p {
-  margin: 0 0 8px;
+  margin: 0 0 5px;
   color: #bbf7d0;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .play-controls button {
-  padding: 7px 12px;
+  padding: 5px 9px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 6px;
   background: #34d399;
   color: #052e16;
   font-weight: 700;
@@ -216,12 +285,11 @@ button {
   cursor: default;
 }
 
-/* =========================================================
-   FIXED FOUNDATION BOARD
-   Fixed columns:
-   Hearts / Diamonds / Clubs / Spades
-   Ascending row + Descending row
-   ========================================================= */
+/* FOUNDATIONS
+   Fixed columns: Hearts | Diamonds | Clubs | Spades
+   Row 1: A -> K
+   Row 2: K -> A
+*/
 
 .foundation-board {
   width: 100%;
@@ -233,92 +301,89 @@ button {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
 
 .foundation-title-row h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
 }
 
 .foundation-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(105px, 1fr));
-  grid-template-rows: repeat(2, 164px);
-  gap: 7px;
+  grid-template-rows: repeat(2, 132px);
+  gap: 5px;
 }
 
 .foundation-slot {
   box-sizing: border-box;
   width: 100%;
-  height: 164px;
+  height: 132px;
   min-width: 0;
-  padding: 6px;
+  padding: 4px;
   overflow: hidden;
 }
 
 .foundation-label {
-  height: 24px;
+  height: 19px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  font-size: 0.78rem;
+  gap: 3px;
+  font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
 }
 
 .foundation-card-space {
-  height: 128px;
+  height: 105px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .foundation-card-wrap {
-  width: 78px;
-  height: 109px;
+  width: 64px;
+  height: 90px;
 }
 
 .foundation-card-wrap > div {
-  width: 78px;
-  height: 109px;
+  width: 64px;
+  height: 90px;
 }
 
 .foundation-empty {
-  width: 78px;
-  height: 109px;
+  width: 64px;
+  height: 90px;
   border: 2px dashed rgb(134 239 172);
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.55rem;
+  font-size: 1.3rem;
   color: rgb(187 247 208);
 }
 
 .foundation-card-wrap .text-xl {
-  font-size: 0.82rem;
-  line-height: 1rem;
+  font-size: 0.72rem;
+  line-height: 0.85rem;
 }
 
 .foundation-card-wrap .text-5xl {
-  font-size: 2rem;
+  font-size: 1.65rem;
   line-height: 1;
 }
 
 .foundation-card-wrap .p-2 {
-  padding: 5px;
+  padding: 4px;
 }
 
-/* =========================================================
-   RESPONSIVE FALLBACK
-   Desktop remains the primary Grandpa's Solitaire layout.
-   ========================================================= */
+/* RESPONSIVE FALLBACK */
 
 @media (max-width: 1100px) {
-  .game-main {
+  .game-shell {
     min-width: 1000px;
   }
 
