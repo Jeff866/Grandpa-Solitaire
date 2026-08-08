@@ -110,13 +110,18 @@ export function dealOne(game) {
   const isAce = card.rank === "A";
   const isMatch = card.rank === pileRank;
 
-  // Every Ace burns one extra card.
+  // Every Ace sends one additional card face-down
+  // to the discard pile.
   if (isAce) {
     burnCard(game);
   }
 
-  // Every correct pile burns two extra cards.
-  // Ace on Ace therefore burns three.
+  // A card matching the rank pile where it was dealt
+  // sends two additional cards face-down to discard.
+  //
+  // Therefore, an Ace dealt to the Ace pile sends
+  // three cards total to discard:
+  // 1 for being an Ace + 2 for matching the pile.
   if (isMatch) {
     burnCard(game);
     burnCard(game);
@@ -133,11 +138,30 @@ export function dealOne(game) {
 export function dealRound(game) {
   if (game.phase !== "Deal") return;
 
+  const startingPile = game.currentPile;
+
   for (
     let i = 0;
     i < RANKS.length && game.phase === "Deal";
     i++
   ) {
     dealOne(game);
+  }
+
+  // Completing a full A-through-K round sends
+  // one additional card face-down to discard.
+  //
+  // Only do this when the entire 13-pile round
+  // actually completed and the game is still
+  // in the Deal phase.
+  if (
+    game.phase === "Deal" &&
+    game.currentPile === startingPile
+  ) {
+    burnCard(game);
+
+    if (game.stock.length === 0) {
+      beginPlay(game);
+    }
   }
 }

@@ -2,118 +2,68 @@ export default function StockArea({
   stock,
   discard,
 }) {
-
   const topDiscard =
     discard[discard.length - 1];
 
-
   return (
+    <section className="stock-area">
+      <h2>Stock & Discard</h2>
 
-    <section className="mb-10">
-
-      <h2 className="text-2xl font-bold mb-4">
-        Stock & Discard
-      </h2>
-
-
-      <div className="grid grid-cols-2 gap-6">
-
-
-        <div className="bg-green-800 rounded-xl p-5 shadow text-center">
-
-          <div className="font-bold text-xl mb-3">
+      <div className="stock-discard-grid">
+        <div className="stock-card-box">
+          <div className="stock-card-title">
             Stock
           </div>
 
-
-          <div className="
-            h-32
-            flex
-            items-center
-            justify-center
-            border-2
-            border-dashed
-            border-green-300
-            rounded-lg
-          ">
-
+          <div className="stock-card-space">
             {stock > 0 ? (
-
-              <div className="text-5xl">
+              <div className="card-back-symbol">
                 🂠
               </div>
-
             ) : (
-
-              <div>
-                Empty
-              </div>
-
+              <div>Empty</div>
             )}
-
           </div>
 
-
-          <div className="mt-3">
+          <div className="stock-card-count">
             {stock} cards
           </div>
-
-
         </div>
 
-
-
-
-
-        <div className="bg-green-800 rounded-xl p-5 shadow text-center">
-
-          <div className="font-bold text-xl mb-3">
+        <div className="stock-card-box">
+          <div className="stock-card-title">
             Discard
           </div>
 
-
-          <div className="
-            h-32
-            flex
-            items-center
-            justify-center
-            border-2
-            border-dashed
-            border-green-300
-            rounded-lg
-          ">
-
+          <div className="stock-card-space">
             {topDiscard ? (
-
-              <div className="text-5xl">
-                {topDiscard.rank}
-                {topDiscard.suit}
-              </div>
-
+              topDiscard.faceUp ? (
+                <div
+                  className={
+                    topDiscard.suit === "♥" ||
+                    topDiscard.suit === "♦"
+                      ? "discard-face red-card"
+                      : "discard-face black-card"
+                  }
+                >
+                  {topDiscard.rank}
+                  {topDiscard.suit}
+                </div>
+              ) : (
+                <div className="card-back-symbol">
+                  🂠
+                </div>
+              )
             ) : (
-
-              <div>
-                Empty
-              </div>
-
+              <div>Empty</div>
             )}
-
           </div>
 
-
-          <div className="mt-3">
+          <div className="stock-card-count">
             {discard.length} cards
           </div>
-
-
         </div>
-
-
       </div>
-
-
     </section>
-
   );
-
 }

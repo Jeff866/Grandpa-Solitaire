@@ -246,17 +246,85 @@ button {
   background: rgba(20, 83, 45, 0.45);
 }
 
-.stock-panel h2,
 .active-panel h2,
 .play-controls h2 {
   margin-top: 0;
-}
-
-.active-panel h2,
-.play-controls h2 {
   margin-bottom: 4px;
   font-size: 0.95rem;
 }
+
+/* STOCK & DISCARD */
+
+.stock-area {
+  width: 100%;
+  margin: 0;
+}
+
+.stock-area h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.stock-discard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.stock-card-box {
+  min-width: 0;
+  padding: 6px 4px;
+  border-radius: 7px;
+  background: rgba(22, 101, 52, 0.85);
+  text-align: center;
+}
+
+.stock-card-title {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.stock-card-space {
+  width: 58px;
+  height: 82px;
+  margin: 0 auto;
+  border: 2px dashed rgb(134 239 172);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-back-symbol {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.discard-face {
+  font-size: 1.55rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.red-card {
+  color: #dc2626;
+}
+
+.black-card {
+  color: white;
+}
+
+.stock-card-count {
+  margin-top: 5px;
+  color: #dcfce7;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+/* PLAY CONTROLS */
 
 .play-controls {
   margin-top: 5px;
@@ -285,11 +353,7 @@ button {
   cursor: default;
 }
 
-/* FOUNDATIONS
-   Fixed columns: Hearts | Diamonds | Clubs | Spades
-   Row 1: A -> K
-   Row 2: K -> A
-*/
+/* FOUNDATIONS */
 
 .foundation-board {
   width: 100%;
