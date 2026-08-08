@@ -2,7 +2,8 @@ import PlayingCard from "./PlayingCard";
 
 export default function Hand({
   cards = [],
-  onPlayCard,
+  selectedIndex = null,
+  onSelectCard,
 }) {
   function getCardPosition(index, count) {
     if (count <= 1) {
@@ -13,11 +14,8 @@ export default function Hand({
     }
 
     /*
-     * Spread the hand across the available width.
-     *
-     * Later cards overlap earlier cards like a normal
-     * fanned hand, but each card keeps enough of its
-     * upper-left corner visible to identify rank/suit.
+     * Spread the active pile across the available width.
+     * Every card remains identifiable and selectable.
      */
     const maxSpread =
       count <= 7
@@ -49,38 +47,37 @@ export default function Hand({
               cards.length
             );
 
-            const isPlayableCard = index === 0;
+            const selected =
+              index === selectedIndex;
 
             return (
               <button
                 type="button"
                 key={card.id}
-                onClick={() => {
-                  if (isPlayableCard) {
-                    onPlayCard?.(card, index);
-                  }
-                }}
+                onClick={() =>
+                  onSelectCard?.(
+                    card,
+                    index
+                  )
+                }
                 className={[
                   "active-hand-card",
-                  isPlayableCard
+                  selected
                     ? "active-hand-card-current"
                     : "active-hand-card-waiting",
                 ].join(" ")}
                 style={{
                   left: position.left,
-                  transform: position.transform,
-
-                  /*
-                   * Normal card-hand stacking:
-                   * each card to the right sits above
-                   * the card immediately before it.
-                   */
-                  zIndex: index + 1,
+                  transform:
+                    position.transform,
+                  zIndex: selected
+                    ? 200
+                    : index + 1,
                 }}
                 aria-label={
-                  isPlayableCard
-                    ? `Current card ${card.rank}${card.suit}`
-                    : `${card.rank}${card.suit} waiting`
+                  selected
+                    ? `Selected ${card.rank}${card.suit}`
+                    : `Select ${card.rank}${card.suit}`
                 }
               >
                 <PlayingCard
@@ -99,12 +96,26 @@ export default function Hand({
 
       {cards.length > 0 && (
         <div className="active-hand-count">
-          Current card:{" "}
-          <strong>
-            {cards[0].rank}
-            {cards[0].suit}
-          </strong>
-          {" · "}
+          {selectedIndex !== null &&
+          cards[selectedIndex] ? (
+            <>
+              Selected card:{" "}
+              <strong>
+                {
+                  cards[selectedIndex]
+                    .rank
+                }
+                {
+                  cards[selectedIndex]
+                    .suit
+                }
+              </strong>
+              {" · "}
+            </>
+          ) : (
+            <>Select a card · </>
+          )}
+
           {cards.length} cards remaining
         </div>
       )}

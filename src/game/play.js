@@ -1,6 +1,11 @@
 // Grandpa's Solitaire play engine
 
-export const FOUNDATION_SUITS = ["♥", "♦", "♣", "♠"];
+export const FOUNDATION_SUITS = [
+  "♥",
+  "♦",
+  "♣",
+  "♠",
+];
 
 const ASCENDING = [
   "A",
@@ -45,17 +50,22 @@ function nextDescendingRank(pile) {
 export function legalMoves(game, card) {
   if (!card) return [];
 
-  const index = FOUNDATION_SUITS.indexOf(card.suit);
+  const index =
+    FOUNDATION_SUITS.indexOf(card.suit);
 
   if (index === -1) return [];
 
   const moves = [];
 
-  const ascendingPile = game.ascending[index];
-  const descendingPile = game.descending[index];
+  const ascendingPile =
+    game.ascending[index];
+
+  const descendingPile =
+    game.descending[index];
 
   if (
-    card.rank === nextAscendingRank(ascendingPile)
+    card.rank ===
+    nextAscendingRank(ascendingPile)
   ) {
     moves.push({
       type: "ascending",
@@ -64,7 +74,8 @@ export function legalMoves(game, card) {
   }
 
   if (
-    card.rank === nextDescendingRank(descendingPile)
+    card.rank ===
+    nextDescendingRank(descendingPile)
   ) {
     moves.push({
       type: "descending",
@@ -75,8 +86,15 @@ export function legalMoves(game, card) {
   return moves;
 }
 
-function placeOnFoundation(game, card, move) {
-  const valid = legalMoves(game, card).find(
+function placeOnFoundation(
+  game,
+  card,
+  move
+) {
+  const valid = legalMoves(
+    game,
+    card
+  ).find(
     (candidate) =>
       candidate.type === move.type &&
       candidate.index === move.index
@@ -85,64 +103,100 @@ function placeOnFoundation(game, card, move) {
   if (!valid) return false;
 
   if (move.type === "ascending") {
-    game.ascending[move.index].push(card);
+    game.ascending[
+      move.index
+    ].push(card);
   } else {
-    game.descending[move.index].push(card);
+    game.descending[
+      move.index
+    ].push(card);
   }
 
   return true;
 }
 
 /*
- * Play the current card from the Active Pile.
+ * Play a selected card from the Active Pile.
  *
- * The first card in game.hand is always the current
- * playable card from that pile.
+ * Any card in game.hand may be selected and
+ * played if it has a legal foundation move.
+ *
+ * Removing a selected card must preserve the
+ * relative order of every remaining card.
  */
-export function playCard(game, move) {
-  if (game.hand.length === 0) return false;
+export function playCard(
+  game,
+  move,
+  handIndex = 0
+) {
+  if (game.hand.length === 0) {
+    return false;
+  }
 
-  const card = game.hand[0];
+  if (
+    handIndex < 0 ||
+    handIndex >= game.hand.length
+  ) {
+    return false;
+  }
 
-  const success = placeOnFoundation(
-    game,
-    card,
-    move
+  const card =
+    game.hand[handIndex];
+
+  const success =
+    placeOnFoundation(
+      game,
+      card,
+      move
+    );
+
+  if (!success) {
+    return false;
+  }
+
+  game.hand.splice(
+    handIndex,
+    1
   );
-
-  if (!success) return false;
-
-  game.hand.shift();
 
   return true;
 }
 
 /*
- * Play the exposed top card from one of the 13 Deal Piles.
+ * Play the exposed top card from one of
+ * the 13 Deal Piles.
  *
- * Deal piles use the final array item as the exposed
- * top card.
+ * Deal piles use the final array item as
+ * the exposed top card.
  */
 export function playDealPileCard(
   game,
   rank,
   move
 ) {
-  const pile = game.piles[rank];
+  const pile =
+    game.piles[rank];
 
-  if (!pile || pile.length === 0) {
+  if (
+    !pile ||
+    pile.length === 0
+  ) {
     return false;
   }
 
-  const card = pile[pile.length - 1];
+  const card =
+    pile[pile.length - 1];
 
-  const success = placeOnFoundation(
-    game,
-    card,
-    move
-  );
+  const success =
+    placeOnFoundation(
+      game,
+      card,
+      move
+    );
 
-  if (!success) return false;
+  if (!success) {
+    return false;
+  }
 
   pile.pop();
 
@@ -150,44 +204,71 @@ export function playDealPileCard(
 }
 
 export function hasLegalMove(game) {
+  /*
+   * Every card currently in the Active
+   * Pile is available for selection.
+   */
   if (game.hand.length > 0) {
-    if (
-      legalMoves(game, game.hand[0]).length > 0
-    ) {
+    const handHasMove =
+      game.hand.some(
+        (card) =>
+          legalMoves(
+            game,
+            card
+          ).length > 0
+      );
+
+    if (handHasMove) {
       return true;
     }
   }
 
-  return Object.values(game.piles).some(
-    (pile) => {
-      if (!pile || pile.length === 0) {
-        return false;
-      }
-
-      const topCard =
-        pile[pile.length - 1];
-
-      return (
-        legalMoves(game, topCard).length > 0
-      );
+  /*
+   * The exposed top card of every Deal
+   * Pile is also available for play.
+   */
+  return Object.values(
+    game.piles
+  ).some((pile) => {
+    if (
+      !pile ||
+      pile.length === 0
+    ) {
+      return false;
     }
-  );
+
+    const topCard =
+      pile[pile.length - 1];
+
+    return (
+      legalMoves(
+        game,
+        topCard
+      ).length > 0
+    );
+  });
 }
 
-export function foundationCardsPlayed(game) {
+export function foundationCardsPlayed(
+  game
+) {
   return (
     game.ascending.reduce(
-      (sum, pile) => sum + pile.length,
+      (sum, pile) =>
+        sum + pile.length,
       0
     ) +
     game.descending.reduce(
-      (sum, pile) => sum + pile.length,
+      (sum, pile) =>
+        sum + pile.length,
       0
     )
   );
 }
 
-export function drawPileRemaining(game) {
+export function drawPileRemaining(
+  game
+) {
   return game.drawPile.length;
 }
 
@@ -204,5 +285,8 @@ export function gameOver(game) {
 }
 
 export function isVictory(game) {
-  return foundationCardsPlayed(game) === 104;
+  return (
+    foundationCardsPlayed(game) ===
+    104
+  );
 }
