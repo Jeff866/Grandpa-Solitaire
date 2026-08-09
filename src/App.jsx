@@ -431,6 +431,7 @@ export default function App() {
   return (
     <div className="game-shell">
       <Header
+        phase={game.phase}
         onNewGame={newGame}
         onDealOne={handleDealOne}
         onDealRound={
