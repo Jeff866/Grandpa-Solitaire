@@ -589,3 +589,498 @@ button {
   box-shadow:
     0 10px 22px rgba(0, 0, 0, 0.35);
 }
+
+/* PHONE ORIENTATION */
+
+@media (max-width: 700px) and (orientation: portrait) {
+  body {
+    overflow: hidden;
+  }
+
+  .game-shell {
+    display: none;
+  }
+
+  body::before {
+    content: "↻";
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 46vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 18px;
+    font-size: 4rem;
+    color: white;
+    z-index: 9999;
+  }
+
+  body::after {
+    content: "Rotate your phone to play Grandpa's Solitaire";
+    position: fixed;
+    inset: 46vh 24px auto 24px;
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: white;
+    z-index: 9999;
+  }
+}
+
+/* PHONE LANDSCAPE GAME LAYOUT */
+
+@media (max-height: 700px) and (orientation: landscape) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  .game-shell {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+  }
+
+  .game-header {
+    min-height: 42px;
+    padding: 4px 8px;
+    grid-template-columns: minmax(150px, 1fr) auto minmax(120px, 1fr);
+    gap: 6px;
+  }
+
+  .game-header-brand {
+    gap: 5px;
+  }
+
+  .game-header-brand h1 {
+    font-size: 1rem;
+  }
+
+  .game-header-brand span {
+    font-size: 0.55rem;
+  }
+
+  .game-header-deal-controls {
+    gap: 4px;
+  }
+
+  .game-header button {
+    padding: 5px 8px;
+    font-size: 0.62rem;
+    border-radius: 7px;
+  }
+
+  .game-main {
+    width: 100%;
+    max-width: none;
+    padding: 3px 6px 6px;
+  }
+
+  .game-info-row {
+    margin-bottom: 2px;
+  }
+
+  .status-bar {
+    min-height: 28px;
+    padding: 3px 8px;
+    gap: 6px;
+    font-size: 0.62rem;
+    border-radius: 6px;
+  }
+
+  .deal-section {
+    margin-top: 2px;
+  }
+
+  .deal-section-heading {
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+
+  .deal-section-heading h2 {
+    font-size: 0.78rem;
+  }
+
+  .deal-section-heading p {
+    font-size: 0.58rem;
+  }
+
+  .deal-piles-row {
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .deal-pile {
+    padding: 1px;
+    border-radius: 4px;
+  }
+
+  .deal-pile-label {
+    margin-bottom: 1px;
+    font-size: 0.56rem;
+  }
+
+  .deal-pile-card-area {
+    max-width: 34px;
+  }
+
+  .deal-pile-count {
+    margin-top: 1px;
+    font-size: 0.48rem;
+  }
+
+  .deal-pile-card-area .text-xl {
+    font-size: 0.5rem;
+    line-height: 0.55rem;
+  }
+
+  .deal-pile-card-area .text-5xl {
+    font-size: 0.95rem;
+  }
+
+  .deal-pile-card-area .p-2 {
+    padding: 2px;
+  }
+
+  .lower-board {
+    grid-template-columns:
+      minmax(100px, 0.7fr)
+      minmax(150px, 1.2fr)
+      minmax(270px, 2.3fr);
+    gap: 4px;
+    margin-top: 3px;
+  }
+
+  .stock-panel,
+  .active-panel {
+    padding: 3px;
+    border-radius: 5px;
+  }
+
+  .stock-area h2,
+  .active-panel h2,
+  .play-controls h2,
+  .foundation-title-row h2 {
+    font-size: 0.72rem;
+  }
+
+  .stock-area h2 {
+    margin-bottom: 3px;
+  }
+
+  .stock-discard-grid {
+    gap: 3px;
+  }
+
+  .stock-card-box {
+    padding: 3px 2px;
+    border-radius: 4px;
+  }
+
+  .stock-card-title {
+    margin-bottom: 2px;
+    font-size: 0.58rem;
+  }
+
+  .stock-card-space {
+    width: 38px;
+    height: 53px;
+    border-width: 1px;
+  }
+
+  .card-back-symbol {
+    font-size: 1.2rem;
+  }
+
+  .discard-face {
+    font-size: 0.9rem;
+  }
+
+  .stock-card-count {
+    margin-top: 2px;
+    font-size: 0.5rem;
+  }
+
+  .play-controls {
+    margin-top: 3px;
+    padding-top: 3px;
+  }
+
+  .play-controls p {
+    margin-bottom: 3px;
+    font-size: 0.55rem;
+  }
+
+  .play-controls button {
+    padding: 4px 6px;
+    font-size: 0.58rem;
+  }
+
+  .active-panel {
+    height: 178px;
+  }
+
+  .active-hand {
+    height: 150px;
+  }
+
+  .active-hand-area {
+    height: 128px;
+    border-radius: 4px;
+  }
+
+  .active-hand-empty {
+    font-size: 0.58rem;
+  }
+
+  .active-hand-card {
+    top: 7px;
+    width: 48px;
+    height: 67px;
+  }
+
+  .active-hand-card > div {
+    width: 48px;
+    height: 67px;
+  }
+
+  .active-hand-card .text-xl {
+    font-size: 0.58rem;
+    line-height: 0.65rem;
+  }
+
+  .active-hand-card .text-5xl {
+    font-size: 1.15rem;
+  }
+
+  .active-hand-card .p-2 {
+    padding: 2px;
+  }
+
+  .active-hand-card-current:hover {
+    top: 4px;
+  }
+
+  .active-hand-card-waiting:hover {
+    top: 7px;
+  }
+
+  .active-hand-count {
+    height: 18px;
+    padding-top: 3px;
+    font-size: 0.52rem;
+  }
+
+  .foundation-title-row {
+    margin-bottom: 2px;
+    gap: 4px;
+  }
+
+  .foundation-title-row {
+    align-items: baseline;
+    flex-direction: row;
+  }
+
+  .foundation-title-row > * {
+    font-size: 0.6rem;
+  }
+
+  .foundation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 82px);
+    gap: 2px;
+  }
+
+  .foundation-slot {
+    height: 82px;
+    padding: 2px;
+  }
+
+  .foundation-label {
+    height: 13px;
+    gap: 1px;
+    font-size: 0.46rem;
+  }
+
+  .foundation-card-space {
+    height: 65px;
+  }
+
+  .foundation-card-wrap,
+  .foundation-card-wrap > div,
+  .foundation-empty {
+    width: 38px;
+    height: 53px;
+  }
+
+  .foundation-empty {
+    border-width: 1px;
+    font-size: 0.9rem;
+  }
+
+  .foundation-card-wrap .text-xl {
+    font-size: 0.52rem;
+    line-height: 0.58rem;
+  }
+
+  .foundation-card-wrap .text-5xl {
+    font-size: 1rem;
+  }
+
+  .foundation-card-wrap .p-2 {
+    padding: 2px;
+  }
+}
+
+/* PHONE LANDSCAPE READABILITY BOOST */
+
+@media (min-width: 600px) and (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .game-header {
+    min-height: 50px;
+    padding: 5px 10px;
+  }
+
+  .game-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .game-header button {
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 0.68rem;
+  }
+
+  .game-main {
+    padding: 4px 7px 7px;
+  }
+
+  .status-bar {
+    min-height: 34px;
+    padding: 5px 8px;
+    font-size: 0.68rem;
+  }
+
+  .deal-section-heading h2 {
+    font-size: 0.82rem;
+  }
+
+  .deal-section-heading p {
+    font-size: 0.62rem;
+  }
+
+  .deal-pile-label {
+    font-size: 0.62rem;
+  }
+
+  .deal-pile-card-area {
+    max-width: 38px;
+  }
+
+  .deal-pile-count {
+    font-size: 0.52rem;
+  }
+
+  .lower-board {
+    grid-template-columns:
+      minmax(105px, 0.75fr)
+      minmax(175px, 1.3fr)
+      minmax(300px, 2.4fr);
+  }
+
+  .stock-area h2,
+  .active-panel h2,
+  .foundation-title-row h2 {
+    font-size: 0.78rem;
+  }
+
+  .stock-card-title {
+    font-size: 0.62rem;
+  }
+
+  .stock-card-space {
+    width: 42px;
+    height: 59px;
+  }
+
+  .stock-card-count {
+    font-size: 0.53rem;
+  }
+
+  .foundation-title-row > * {
+    font-size: 0.64rem;
+  }
+
+  .foundation-grid {
+    grid-template-rows: repeat(2, 88px);
+  }
+
+  .foundation-slot {
+    height: 88px;
+  }
+
+  .foundation-label {
+    height: 14px;
+    font-size: 0.5rem;
+  }
+
+  .foundation-card-space {
+    height: 70px;
+  }
+
+  .foundation-card-wrap,
+  .foundation-card-wrap > div,
+  .foundation-empty {
+    width: 42px;
+    height: 59px;
+  }
+
+  .active-hand-card {
+    width: 52px;
+    height: 73px;
+  }
+
+  .active-hand-card > div {
+    width: 52px;
+    height: 73px;
+  }
+}
+
+/* PHONE LANDSCAPE HEIGHT TUNING */
+
+@media (min-width: 600px) and (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .active-panel {
+    height: 168px;
+  }
+
+  .active-hand {
+    height: 140px;
+  }
+
+  .active-hand-area {
+    height: 118px;
+  }
+
+  .foundation-grid {
+    grid-template-rows: repeat(2, 82px);
+  }
+
+  .foundation-slot {
+    height: 82px;
+  }
+
+  .foundation-card-space {
+    height: 64px;
+  }
+
+  .foundation-card-wrap,
+  .foundation-card-wrap > div,
+  .foundation-empty {
+    width: 40px;
+    height: 56px;
+  }
+}
