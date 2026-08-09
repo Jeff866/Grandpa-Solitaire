@@ -47,17 +47,18 @@ export function createEmptyGame() {
     ascending: [[], [], [], []],
     descending: [[], [], [], []],
 
-    // Cards temporarily picked up from the selected
-    // rank pile. The exposed selector card is added
-    // to this hand when a nonempty pile is picked up.
+    // Cards temporarily picked up from either
+    // selector play or the Final Pass.
     hand: [],
 
-    // Rank selected by the currently exposed
-    // selector card.
+    // Rank currently being worked.
     activeRank: null,
 
-    // Currently exposed selector card.
+    // Currently exposed selector card during Play.
     activeDiscard: null,
+
+    // Index into RANKS during the Final Pass.
+    finalPassIndex: 0,
   };
 }
 
@@ -88,24 +89,67 @@ function beginPlay(game) {
   game.activeRank = null;
   game.activeDiscard = null;
   game.hand = [];
+  game.finalPassIndex = 0;
 
   revealNextDiscard(game);
 }
 
 /*
+ * Start the one-time A-through-K Final Pass.
+ */
+function beginFinalPass(game) {
+  game.phase = "FinalPass";
+  game.activeDiscard = null;
+  game.activeRank = null;
+  game.hand = [];
+  game.finalPassIndex = 0;
+
+  advanceFinalPass(game);
+}
+
+/*
+ * Advance to the next nonempty pile in A→K order.
+ *
+ * Empty piles are skipped automatically.
+ *
+ * After K has been processed, the game enters
+ * the Finished phase.
+ */
+function advanceFinalPass(game) {
+  while (
+    game.finalPassIndex < RANKS.length
+  ) {
+    const rank =
+      RANKS[game.finalPassIndex];
+
+    const pile =
+      game.piles[rank];
+
+    if (
+      pile &&
+      pile.length > 0
+    ) {
+      game.activeRank = rank;
+      return true;
+    }
+
+    game.finalPassIndex += 1;
+  }
+
+  game.activeRank = null;
+  game.hand = [];
+  game.phase = "Finished";
+
+  return false;
+}
+
+/*
  * Reveal the next selector card.
  *
- * If the selector points to an empty rank pile,
- * that selector is consumed immediately and the
- * next selector is revealed.
+ * Empty selected piles are skipped.
  *
- * Continue until:
- *
- * 1. a selector points to a nonempty rank pile, or
- * 2. no selector cards remain.
- *
- * This prevents Play from becoming stranded on
- * a rank pile that has already been cleared.
+ * When no selector cards remain, immediately
+ * begin the Final Pass.
  */
 export function revealNextDiscard(game) {
   if (game.phase !== "Play") {
@@ -121,27 +165,20 @@ export function revealNextDiscard(game) {
   }
 
   while (game.drawPile.length > 0) {
-    const card = game.drawPile.pop();
+    const card =
+      game.drawPile.pop();
 
     const rank = card.rank;
-    const pile = game.piles[rank];
+    const pile =
+      game.piles[rank];
 
-    /*
-     * Empty rank pile:
-     *
-     * Consume this selector and immediately
-     * continue to the next selector.
-     */
-    if (!pile || pile.length === 0) {
+    if (
+      !pile ||
+      pile.length === 0
+    ) {
       continue;
     }
 
-    /*
-     * Nonempty rank pile:
-     *
-     * Leave this selector exposed so the player
-     * can pick up the selected pile.
-     */
     game.activeDiscard = {
       ...card,
       faceUp: true,
@@ -152,28 +189,21 @@ export function revealNextDiscard(game) {
     return true;
   }
 
-  /*
-   * No selectors remain.
-   */
   game.activeDiscard = null;
   game.activeRank = null;
+
+  beginFinalPass(game);
 
   return false;
 }
 
 /*
- * Pick up the entire rank pile selected by
- * activeDiscard.
+ * Pick up the selected rank pile during
+ * normal selector Play.
  *
- * The exposed selector card ALSO becomes part
- * of the hand.
- *
- * Existing rank-pile order is preserved.
- *
- * The selector is placed at the end of the hand
- * so that, if it is not played, it becomes the
- * TOP card when the hand is returned to the
- * rank pile.
+ * The selector card is appended to the hand.
+ * If it remains unplayed, it therefore becomes
+ * the top card when the pile is returned.
  */
 export function pickUpActivePile(game) {
   if (game.phase !== "Play") {
@@ -194,15 +224,10 @@ export function pickUpActivePile(game) {
   const cards =
     game.piles[game.activeRank];
 
-  /*
-   * This normally cannot occur because
-   * revealNextDiscard skips empty piles.
-   *
-   * Keep this defensive check so the game
-   * cannot become stranded if state changes
-   * between revealing and picking up.
-   */
-  if (!cards || cards.length === 0) {
+  if (
+    !cards ||
+    cards.length === 0
+  ) {
     game.activeDiscard = null;
     game.activeRank = null;
 
@@ -231,33 +256,16 @@ export function pickUpActivePile(game) {
     game.activeRank
   ] = [];
 
-  /*
-   * The selector is no longer sitting
-   * separately in Discard. It is now
-   * physically part of the Active Pile.
-   */
   game.activeDiscard = null;
 
   return true;
 }
 
 /*
- * Finish the current active pile.
+ * Finish the current selector-play pile.
  *
- * Any unplayed cards go back to their selected
- * rank pile in their current order.
- *
- * Because the selector was appended to the hand
- * when the pile was picked up, an unplayed
- * selector naturally becomes the top card of
- * the returned pile.
- *
- * The exposed top card is face up so it can
- * be played later.
- *
- * After the pile is returned, reveal the next
- * valid selector. Empty selected piles are
- * skipped automatically by revealNextDiscard.
+ * Remaining cards return in their current
+ * relative order. No sorting is performed.
  */
 export function finishActivePile(game) {
   if (game.phase !== "Play") {
@@ -295,12 +303,109 @@ export function finishActivePile(game) {
 }
 
 /*
- * Compatibility wrapper.
+ * Pick up the entire current pile during
+ * the Final Pass.
  *
- * In Play, "draw" means pick up the rank pile
- * selected by the currently exposed selector.
+ * Unlike normal selector Play, no selector
+ * card is added.
+ *
+ * Card order is preserved exactly.
+ */
+export function pickUpFinalPassPile(game) {
+  if (game.phase !== "FinalPass") {
+    return false;
+  }
+
+  if (!game.activeRank) {
+    return false;
+  }
+
+  if (game.hand.length > 0) {
+    return false;
+  }
+
+  const cards =
+    game.piles[game.activeRank];
+
+  if (
+    !cards ||
+    cards.length === 0
+  ) {
+    game.finalPassIndex += 1;
+    game.activeRank = null;
+
+    advanceFinalPass(game);
+
+    return false;
+  }
+
+  game.hand = cards.map(
+    (card) => ({
+      ...card,
+      faceUp: true,
+    })
+  );
+
+  game.piles[
+    game.activeRank
+  ] = [];
+
+  return true;
+}
+
+/*
+ * Finish one pile during the Final Pass.
+ *
+ * Any unplayed cards return in their current
+ * relative order. They cannot be rearranged.
+ *
+ * Then advance exactly forward through
+ * A, 2, 3, ... Q, K.
+ */
+export function finishFinalPassPile(game) {
+  if (game.phase !== "FinalPass") {
+    return false;
+  }
+
+  if (!game.activeRank) {
+    return false;
+  }
+
+  const rank =
+    game.activeRank;
+
+  if (game.hand.length > 0) {
+    game.piles[rank] =
+      game.hand.map(
+        (card, index) => ({
+          ...card,
+          faceUp:
+            index ===
+            game.hand.length - 1,
+        })
+      );
+  } else {
+    game.piles[rank] = [];
+  }
+
+  game.hand = [];
+  game.activeRank = null;
+
+  game.finalPassIndex += 1;
+
+  advanceFinalPass(game);
+
+  return true;
+}
+
+/*
+ * Compatibility wrapper.
  */
 export function drawCard(game) {
+  if (game.phase === "FinalPass") {
+    return pickUpFinalPassPile(game);
+  }
+
   return pickUpActivePile(game);
 }
 
@@ -332,24 +437,16 @@ export function dealOne(game) {
   const isMatch =
     card.rank === pileRank;
 
-  /*
-   * Every Ace sends one extra card
-   * face-down to Discard.
-   */
+  // Every Ace sends one extra card
+  // face-down to Discard.
   if (isAce) {
     burnCard(game);
   }
 
-  /*
-   * Every card dealt onto its matching
-   * rank pile sends two extra cards
-   * face-down to Discard.
-   *
-   * Ace on Ace therefore sends three:
-   *
-   * +1 for Ace
-   * +2 for matching its pile
-   */
+  // Every matching-rank deal sends two
+  // additional cards face-down to Discard.
+  //
+  // Ace on Ace therefore sends three total.
   if (isMatch) {
     burnCard(game);
     burnCard(game);
@@ -381,11 +478,9 @@ export function dealRound(game) {
     dealOne(game);
   }
 
-  /*
-   * Completing a full A-through-K round
-   * sends one additional card face-down
-   * to Discard.
-   */
+  // Completing a full A-through-K round
+  // sends one additional card face-down
+  // to Discard.
   if (
     game.phase === "Deal" &&
     game.currentPile ===

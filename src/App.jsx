@@ -19,6 +19,8 @@ import {
   dealRound,
   pickUpActivePile,
   finishActivePile,
+  pickUpFinalPassPile,
+  finishFinalPassPile,
   RANKS,
 } from "./game/deal";
 
@@ -33,15 +35,6 @@ export default function App() {
   const [won, setWon] =
     useState(false);
 
-  /*
-   * selectedSource may be:
-   *
-   * { type: "deal", rank }
-   *
-   * or
-   *
-   * { type: "hand", index }
-   */
   const [
     selectedSource,
     setSelectedSource,
@@ -116,6 +109,10 @@ export default function App() {
 
     action(updated);
 
+    if (isVictory(updated)) {
+      setWon(true);
+    }
+
     setGame(updated);
   }
 
@@ -150,8 +147,19 @@ export default function App() {
     rank,
     card
   ) {
+    /*
+     * Direct exposed top-card Deal Pile
+     * play is available during normal
+     * Play AND during the Final Pass.
+     *
+     * Only the exposed top card can be
+     * played. Removing it naturally
+     * exposes the next card underneath
+     * without changing pile order.
+     */
     if (
-      game.phase !== "Play"
+      game.phase !== "Play" &&
+      game.phase !== "FinalPass"
     ) {
       return;
     }
@@ -187,17 +195,14 @@ export default function App() {
     index
   ) {
     if (
-      game.phase !== "Play"
+      game.phase !== "Play" &&
+      game.phase !== "FinalPass"
     ) {
       return;
     }
 
     if (!card) return;
 
-    /*
-     * Clicking the currently selected card
-     * again deselects it.
-     */
     const alreadySelected =
       selectedSource?.type ===
         "hand" &&
@@ -208,11 +213,6 @@ export default function App() {
       return;
     }
 
-    /*
-     * Otherwise select this specific card.
-     * It does not move until a legal
-     * foundation is clicked.
-     */
     setSelectedSource({
       type: "hand",
       index,
@@ -227,35 +227,26 @@ export default function App() {
     }
 
     updateGame((updated) => {
-      let success = false;
-
       if (
         selectedSource.type ===
         "deal"
       ) {
-        success =
-          playDealPileCard(
-            updated,
-            selectedSource.rank,
-            move
-          );
+        playDealPileCard(
+          updated,
+          selectedSource.rank,
+          move
+        );
       }
 
       if (
         selectedSource.type ===
         "hand"
       ) {
-        success = playCard(
+        playCard(
           updated,
           move,
           selectedSource.index
         );
-      }
-
-      if (!success) return;
-
-      if (isVictory(updated)) {
-        setWon(true);
       }
     });
 
@@ -275,6 +266,22 @@ export default function App() {
 
     updateGame((updated) => {
       finishActivePile(updated);
+    });
+  }
+
+  function handlePickUpFinalPassPile() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      pickUpFinalPassPile(updated);
+    });
+  }
+
+  function handleFinishFinalPassPile() {
+    setSelectedSource(null);
+
+    updateGame((updated) => {
+      finishFinalPassPile(updated);
     });
   }
 
@@ -299,6 +306,12 @@ export default function App() {
       ? [game.activeDiscard]
       : [];
 
+  const inFinalPass =
+    game.phase === "FinalPass";
+
+  const gameFinished =
+    game.phase === "Finished";
+
   return (
     <div className="game-shell">
       <Header
@@ -316,8 +329,7 @@ export default function App() {
             stock={
               game.phase === "Deal"
                 ? game.stock.length
-                : game.drawPile
-                    .length +
+                : game.drawPile.length +
                   (game.activeDiscard
                     ? 1
                     : 0)
@@ -355,8 +367,7 @@ export default function App() {
                 <strong>
                   {
                     RANKS[
-                      game
-                        .currentPile
+                      game.currentPile
                     ]
                   }
                 </strong>
@@ -375,15 +386,32 @@ export default function App() {
                   </strong>
                 </p>
               )}
+
+            {inFinalPass &&
+              game.activeRank && (
+                <p>
+                  Final Pass:{" "}
+                  <strong>
+                    {
+                      game.activeRank
+                    }
+                  </strong>{" "}
+                  pile
+                </p>
+              )}
+
+            {gameFinished && (
+              <p>
+                Final Pass complete.
+              </p>
+            )}
           </div>
 
           <div className="deal-piles-row">
             {RANKS.map(
               (rank) => {
                 const pile =
-                  game.piles[
-                    rank
-                  ];
+                  game.piles[rank];
 
                 const topCard =
                   pile.length > 0
@@ -394,8 +422,10 @@ export default function App() {
                     : null;
 
                 const playable =
-                  game.phase ===
-                    "Play" &&
+                  (game.phase ===
+                    "Play" ||
+                    game.phase ===
+                      "FinalPass") &&
                   topCard &&
                   legalMoves(
                     game,
@@ -426,10 +456,8 @@ export default function App() {
               stock={
                 game.phase ===
                 "Deal"
-                  ? game.stock
-                      .length
-                  : game.drawPile
-                      .length
+                  ? game.stock.length
+                  : game.drawPile.length
               }
               discard={
                 game.phase ===
@@ -463,8 +491,7 @@ export default function App() {
                     selects the{" "}
                     <strong>
                       {
-                        game
-                          .activeRank
+                        game.activeRank
                       }
                     </strong>{" "}
                     pile.
@@ -475,16 +502,15 @@ export default function App() {
                     Playing the{" "}
                     <strong>
                       {
-                        game
-                          .activeRank
+                        game.activeRank
                       }
                     </strong>{" "}
                     pile.
                   </p>
                 ) : (
                   <p>
-                    No selector card
-                    remaining.
+                    Preparing next
+                    selector.
                   </p>
                 )}
 
@@ -536,11 +562,99 @@ export default function App() {
                 </button>
               </div>
             )}
+
+            {inFinalPass && (
+              <div className="play-controls">
+                <h2>
+                  Final A→K Pass
+                </h2>
+
+                {game.activeRank ? (
+                  <>
+                    <p>
+                      Now working the{" "}
+                      <strong>
+                        {
+                          game.activeRank
+                        }
+                      </strong>{" "}
+                      pile.
+                    </p>
+
+                    <p>
+                      Play any legal
+                      cards. Remaining
+                      cards stay in their
+                      existing order.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={
+                        handlePickUpFinalPassPile
+                      }
+                      disabled={
+                        game.hand.length >
+                        0
+                      }
+                    >
+                      Pick Up{" "}
+                      {
+                        game.activeRank
+                      }{" "}
+                      Pile
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={
+                        handleFinishFinalPassPile
+                      }
+                      disabled={
+                        game.hand.length ===
+                        0
+                      }
+                      style={{
+                        marginLeft:
+                          "6px",
+                      }}
+                    >
+                      Finish{" "}
+                      {
+                        game.activeRank
+                      }{" "}
+                      Pile
+                    </button>
+                  </>
+                ) : (
+                  <p>
+                    Final Pass complete.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {gameFinished && (
+              <div className="play-controls">
+                <h2>
+                  Game Complete
+                </h2>
+
+                <p>
+                  {won
+                    ? "All 104 cards reached the foundations."
+                    : "The Final Pass is complete."}
+                </p>
+              </div>
+            )}
           </section>
 
           <section className="active-panel">
             <h2>
-              Active Pile
+              {inFinalPass
+                ? "Final Pass Pile"
+                : "Active Pile"}
+
               {game.activeRank
                 ? ` — ${game.activeRank}`
                 : ""}
