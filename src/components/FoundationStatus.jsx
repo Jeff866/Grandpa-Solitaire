@@ -9,11 +9,23 @@ export default function FoundationStatus({
   descending,
   game,
   selectedCard = null,
+  draggedCard = null,
   onPlay,
+  onDropCard,
 }) {
+  /*
+   * Click selection remains the normal fallback.
+   *
+   * While dragging, the dragged card temporarily
+   * becomes the card used to determine which
+   * foundations are legal.
+   */
+  const activeCard =
+    draggedCard || selectedCard;
+
   const moves =
-    selectedCard && game
-      ? legalMoves(game, selectedCard)
+    activeCard && game
+      ? legalMoves(game, activeCard)
       : [];
 
   function isLegal(type, index) {
@@ -34,10 +46,16 @@ export default function FoundationStatus({
     ].join(" ");
   }
 
-  function renderSlot(type, pile, index) {
-    const suit = FOUNDATION_SUITS[index];
+  function renderSlot(
+    type,
+    pile,
+    index
+  ) {
+    const suit =
+      FOUNDATION_SUITS[index];
 
-    const active = isLegal(type, index);
+    const active =
+      isLegal(type, index);
 
     const topCard =
       pile[pile.length - 1];
@@ -51,14 +69,55 @@ export default function FoundationStatus({
         key={`${type}-${suit}`}
         disabled={!active}
         onClick={() => {
-          if (active) {
+          /*
+           * Preserve the existing
+           * click-to-play system.
+           */
+          if (
+            active &&
+            selectedCard
+          ) {
             onPlay?.({
               type,
               index,
             });
           }
         }}
-        className={foundationClass(active)}
+        onDragOver={(event) => {
+          /*
+           * Browsers only allow a drop
+           * when dragover is prevented.
+           *
+           * We only do that for a legal
+           * foundation.
+           */
+          if (
+            active &&
+            draggedCard
+          ) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect =
+              "move";
+          }
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+
+          if (
+            !active ||
+            !draggedCard
+          ) {
+            return;
+          }
+
+          onDropCard?.({
+            type,
+            index,
+          });
+        }}
+        className={foundationClass(
+          active
+        )}
         aria-label={`${suit} ${
           ascendingType
             ? "ascending"
@@ -88,11 +147,17 @@ export default function FoundationStatus({
           {topCard ? (
             <div className="foundation-card-wrap">
               <PlayingCard
-                rank={topCard.rank}
-                suit={topCard.suit}
+                rank={
+                  topCard.rank
+                }
+                suit={
+                  topCard.suit
+                }
                 red={
-                  topCard.suit === "♥" ||
-                  topCard.suit === "♦"
+                  topCard.suit ===
+                    "♥" ||
+                  topCard.suit ===
+                    "♦"
                 }
               />
             </div>
@@ -112,7 +177,8 @@ export default function FoundationStatus({
         <h2>Foundations</h2>
 
         <div>
-          ♥ Hearts · ♦ Diamonds · ♣ Clubs · ♠ Spades
+          ♥ Hearts · ♦ Diamonds ·
+          ♣ Clubs · ♠ Spades
         </div>
       </div>
 

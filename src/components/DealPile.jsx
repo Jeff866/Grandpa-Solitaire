@@ -5,6 +5,8 @@ export default function DealPile({
   cards = [],
   onSelect,
   playable = false,
+  onDragCardStart,
+  onDragCardEnd,
 }) {
   const topCard =
     cards.length > 0
@@ -22,10 +24,15 @@ export default function DealPile({
       ].join(" ")}
       onClick={() => {
         if (topCard && playable) {
-          onSelect?.(label, topCard);
+          onSelect?.(
+            label,
+            topCard
+          );
         }
       }}
-      disabled={!topCard || !playable}
+      disabled={
+        !topCard || !playable
+      }
       aria-label={
         topCard
           ? `${label} pile, top card ${topCard.rank}${topCard.suit}`
@@ -45,6 +52,29 @@ export default function DealPile({
               topCard.suit === "♥" ||
               topCard.suit === "♦"
             }
+            draggable={playable}
+            onDragStart={(event) => {
+              if (!playable) {
+                event.preventDefault();
+                return;
+              }
+
+              event.dataTransfer.setData(
+                "text/plain",
+                topCard.id
+              );
+
+              event.dataTransfer.effectAllowed =
+                "move";
+
+              onDragCardStart?.(
+                label,
+                topCard
+              );
+            }}
+            onDragEnd={() => {
+              onDragCardEnd?.();
+            }}
           />
         ) : (
           <div className="deal-pile-empty">

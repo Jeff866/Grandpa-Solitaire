@@ -40,6 +40,11 @@ export default function App() {
     setSelectedSource,
   ] = useState(null);
 
+  const [
+    draggedSource,
+    setDraggedSource,
+  ] = useState(null);
+
   const [game, setGame] =
     useState(() => {
       const fresh =
@@ -62,6 +67,7 @@ export default function App() {
 
     setWon(false);
     setSelectedSource(null);
+    setDraggedSource(null);
     setGame(fresh);
   }
 
@@ -117,8 +123,7 @@ export default function App() {
   }
 
   const selectedDealCard =
-    selectedSource?.type ===
-    "deal"
+    selectedSource?.type === "deal"
       ? game.piles[
           selectedSource.rank
         ]?.[
@@ -129,8 +134,7 @@ export default function App() {
       : null;
 
   const selectedHandCard =
-    selectedSource?.type ===
-      "hand" &&
+    selectedSource?.type === "hand" &&
     selectedSource.index >= 0 &&
     selectedSource.index <
       game.hand.length
@@ -143,20 +147,35 @@ export default function App() {
     selectedDealCard ||
     selectedHandCard;
 
+  const draggedHandCard =
+    draggedSource?.type === "hand" &&
+    draggedSource.index >= 0 &&
+    draggedSource.index <
+      game.hand.length
+      ? game.hand[
+          draggedSource.index
+        ]
+      : null;
+
+  const draggedDealCard =
+    draggedSource?.type === "deal"
+      ? game.piles[
+          draggedSource.rank
+        ]?.[
+          game.piles[
+            draggedSource.rank
+          ].length - 1
+        ] || null
+      : null;
+
+  const draggedCard =
+    draggedHandCard ||
+    draggedDealCard;
+
   function handleDealPileSelect(
     rank,
     card
   ) {
-    /*
-     * Direct exposed top-card Deal Pile
-     * play is available during normal
-     * Play AND during the Final Pass.
-     *
-     * Only the exposed top card can be
-     * played. Removing it naturally
-     * exposes the next card underneath
-     * without changing pile order.
-     */
     if (
       game.phase !== "Play" &&
       game.phase !== "FinalPass"
@@ -219,6 +238,62 @@ export default function App() {
     });
   }
 
+  function handleHandDragStart(
+    card,
+    index
+  ) {
+    if (
+      game.phase !== "Play" &&
+      game.phase !== "FinalPass"
+    ) {
+      return;
+    }
+
+    if (!card) return;
+
+    setDraggedSource({
+      type: "hand",
+      index,
+    });
+  }
+
+  function handleDealPileDragStart(
+    rank,
+    card
+  ) {
+    if (
+      game.phase !== "Play" &&
+      game.phase !== "FinalPass"
+    ) {
+      return;
+    }
+
+    if (!card) return;
+
+    /*
+     * DealPile only makes a card draggable
+     * when that exposed top card has at
+     * least one legal foundation move.
+     */
+    if (
+      legalMoves(
+        game,
+        card
+      ).length === 0
+    ) {
+      return;
+    }
+
+    setDraggedSource({
+      type: "deal",
+      rank,
+    });
+  }
+
+  function handleDragEnd() {
+    setDraggedSource(null);
+  }
+
   function handleFoundationPlay(
     move
   ) {
@@ -253,8 +328,44 @@ export default function App() {
     setSelectedSource(null);
   }
 
+  function handleFoundationDrop(
+    move
+  ) {
+    if (!draggedSource) {
+      return;
+    }
+
+    updateGame((updated) => {
+      if (
+        draggedSource.type ===
+        "hand"
+      ) {
+        playCard(
+          updated,
+          move,
+          draggedSource.index
+        );
+      }
+
+      if (
+        draggedSource.type ===
+        "deal"
+      ) {
+        playDealPileCard(
+          updated,
+          draggedSource.rank,
+          move
+        );
+      }
+    });
+
+    setDraggedSource(null);
+    setSelectedSource(null);
+  }
+
   function handlePickUpActivePile() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       pickUpActivePile(updated);
@@ -263,6 +374,7 @@ export default function App() {
 
   function handleFinishActivePile() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       finishActivePile(updated);
@@ -271,6 +383,7 @@ export default function App() {
 
   function handlePickUpFinalPassPile() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       pickUpFinalPassPile(updated);
@@ -279,6 +392,7 @@ export default function App() {
 
   function handleFinishFinalPassPile() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       finishFinalPassPile(updated);
@@ -287,6 +401,7 @@ export default function App() {
 
   function handleDealOne() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       dealOne(updated);
@@ -295,6 +410,7 @@ export default function App() {
 
   function handleDealRound() {
     setSelectedSource(null);
+    setDraggedSource(null);
 
     updateGame((updated) => {
       dealRound(updated);
@@ -442,6 +558,12 @@ export default function App() {
                     }
                     onSelect={
                       handleDealPileSelect
+                    }
+                    onDragCardStart={
+                      handleDealPileDragStart
+                    }
+                    onDragCardEnd={
+                      handleDragEnd
                     }
                   />
                 );
@@ -671,6 +793,12 @@ export default function App() {
               onSelectCard={
                 handleHandCardSelect
               }
+              onDragCardStart={
+                handleHandDragStart
+              }
+              onDragCardEnd={
+                handleDragEnd
+              }
             />
           </section>
 
@@ -686,8 +814,14 @@ export default function App() {
               selectedCard={
                 selectedCard
               }
+              draggedCard={
+                draggedCard
+              }
               onPlay={
                 handleFoundationPlay
+              }
+              onDropCard={
+                handleFoundationDrop
               }
             />
           </section>

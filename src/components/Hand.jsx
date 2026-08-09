@@ -4,6 +4,8 @@ export default function Hand({
   cards = [],
   selectedIndex = null,
   onSelectCard,
+  onDragCardStart,
+  onDragCardEnd,
 }) {
   function getCardPosition(index, count) {
     if (count <= 1) {
@@ -25,7 +27,8 @@ export default function Hand({
           : 82;
 
     const position =
-      (index / (count - 1)) * maxSpread;
+      (index / (count - 1)) *
+      maxSpread;
 
     return {
       left: `${position}%`,
@@ -42,10 +45,11 @@ export default function Hand({
           </div>
         ) : (
           cards.map((card, index) => {
-            const position = getCardPosition(
-              index,
-              cards.length
-            );
+            const position =
+              getCardPosition(
+                index,
+                cards.length
+              );
 
             const selected =
               index === selectedIndex;
@@ -87,6 +91,32 @@ export default function Hand({
                     card.suit === "♥" ||
                     card.suit === "♦"
                   }
+                  draggable
+                  onDragStart={(event) => {
+                    /*
+                     * Keep a tiny payload in the native
+                     * drag operation so browsers reliably
+                     * recognize this as a real drag.
+                     *
+                     * App.jsx will remain the authority
+                     * for which card is actually selected.
+                     */
+                    event.dataTransfer.setData(
+                      "text/plain",
+                      card.id
+                    );
+
+                    event.dataTransfer.effectAllowed =
+                      "move";
+
+                    onDragCardStart?.(
+                      card,
+                      index
+                    );
+                  }}
+                  onDragEnd={() => {
+                    onDragCardEnd?.();
+                  }}
                 />
               </button>
             );
