@@ -5,6 +5,7 @@ export default function Header({
   onNewGame,
   onDealOne,
   onDealRound,
+  onHowToPlay,
 }) {
   const canDeal =
     phase === "Deal";
@@ -40,6 +41,13 @@ export default function Header({
       </div>
 
       <div className="game-header-new">
+        <GameButton
+          color="blue"
+          onClick={onHowToPlay}
+        >
+          How to Play
+        </GameButton>
+
         <GameButton
           color="green"
           onClick={onNewGame}

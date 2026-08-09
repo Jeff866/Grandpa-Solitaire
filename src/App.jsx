@@ -7,6 +7,8 @@ import DealPile from "./components/DealPile";
 import FoundationStatus from "./components/FoundationStatus";
 import Hand from "./components/Hand";
 import GameMessage from "./components/GameMessage";
+import HowToPlay from "./components/HowToPlay";
+import "./how-to-play.css";
 
 import {
   createDeck,
@@ -34,6 +36,11 @@ import {
 export default function App() {
   const [won, setWon] =
     useState(false);
+
+  const [
+    howToPlayOpen,
+    setHowToPlayOpen,
+  ] = useState(false);
 
   const [
     selectedSource,
@@ -433,6 +440,9 @@ export default function App() {
       <Header
         phase={game.phase}
         onNewGame={newGame}
+        onHowToPlay={() =>
+          setHowToPlayOpen(true)
+        }
         onDealOne={handleDealOne}
         onDealRound={
           handleDealRound
@@ -828,6 +838,12 @@ export default function App() {
           </section>
         </div>
       </main>
+      <HowToPlay
+        open={howToPlayOpen}
+        onClose={() =>
+          setHowToPlayOpen(false)
+        }
+      />
     </div>
   );
 }
