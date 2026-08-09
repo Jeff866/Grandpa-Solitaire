@@ -580,3 +580,12 @@ button {
     flex-direction: column;
   }
 }
+/* DRAG FEEDBACK */
+
+.playing-card-dragging {
+  opacity: 0.72;
+  transform: scale(0.97);
+  filter: brightness(1.08);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.35);
+}
