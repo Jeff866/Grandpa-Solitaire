@@ -116,19 +116,12 @@ function beginFinalPass(game) {
  * the Finished phase.
  */
 function advanceFinalPass(game) {
-  while (
-    game.finalPassIndex < RANKS.length
-  ) {
-    const rank =
-      RANKS[game.finalPassIndex];
+  while (game.finalPassIndex < RANKS.length) {
+    const rank = RANKS[game.finalPassIndex];
 
-    const pile =
-      game.piles[rank];
+    const pile = game.piles[rank];
 
-    if (
-      pile &&
-      pile.length > 0
-    ) {
+    if (pile && pile.length > 0) {
       game.activeRank = rank;
       return true;
     }
@@ -165,17 +158,12 @@ export function revealNextDiscard(game) {
   }
 
   while (game.drawPile.length > 0) {
-    const card =
-      game.drawPile.pop();
+    const card = game.drawPile.pop();
 
     const rank = card.rank;
-    const pile =
-      game.piles[rank];
+    const pile = game.piles[rank];
 
-    if (
-      !pile ||
-      pile.length === 0
-    ) {
+    if (!pile || pile.length === 0) {
       continue;
     }
 
@@ -210,10 +198,7 @@ export function pickUpActivePile(game) {
     return false;
   }
 
-  if (
-    !game.activeRank ||
-    !game.activeDiscard
-  ) {
+  if (!game.activeRank || !game.activeDiscard) {
     return false;
   }
 
@@ -221,13 +206,9 @@ export function pickUpActivePile(game) {
     return false;
   }
 
-  const cards =
-    game.piles[game.activeRank];
+  const cards = game.piles[game.activeRank];
 
-  if (
-    !cards ||
-    cards.length === 0
-  ) {
+  if (!cards || cards.length === 0) {
     game.activeDiscard = null;
     game.activeRank = null;
 
@@ -236,11 +217,10 @@ export function pickUpActivePile(game) {
     return false;
   }
 
-  const pileCards =
-    cards.map((card) => ({
-      ...card,
-      faceUp: true,
-    }));
+  const pileCards = cards.map((card) => ({
+    ...card,
+    faceUp: true,
+  }));
 
   const selectorCard = {
     ...game.activeDiscard,
@@ -252,9 +232,7 @@ export function pickUpActivePile(game) {
     selectorCard,
   ];
 
-  game.piles[
-    game.activeRank
-  ] = [];
+  game.piles[game.activeRank] = [];
 
   game.activeDiscard = null;
 
@@ -277,20 +255,14 @@ export function finishActivePile(game) {
   }
 
   if (game.hand.length > 0) {
-    game.piles[
-      game.activeRank
-    ] = game.hand.map(
-      (card, index) => ({
+    game.piles[game.activeRank] =
+      game.hand.map((card, index) => ({
         ...card,
         faceUp:
-          index ===
-          game.hand.length - 1,
-      })
-    );
+          index === game.hand.length - 1,
+      }));
   } else {
-    game.piles[
-      game.activeRank
-    ] = [];
+    game.piles[game.activeRank] = [];
   }
 
   game.hand = [];
@@ -324,13 +296,9 @@ export function pickUpFinalPassPile(game) {
     return false;
   }
 
-  const cards =
-    game.piles[game.activeRank];
+  const cards = game.piles[game.activeRank];
 
-  if (
-    !cards ||
-    cards.length === 0
-  ) {
+  if (!cards || cards.length === 0) {
     game.finalPassIndex += 1;
     game.activeRank = null;
 
@@ -339,16 +307,12 @@ export function pickUpFinalPassPile(game) {
     return false;
   }
 
-  game.hand = cards.map(
-    (card) => ({
-      ...card,
-      faceUp: true,
-    })
-  );
+  game.hand = cards.map((card) => ({
+    ...card,
+    faceUp: true,
+  }));
 
-  game.piles[
-    game.activeRank
-  ] = [];
+  game.piles[game.activeRank] = [];
 
   return true;
 }
@@ -371,19 +335,15 @@ export function finishFinalPassPile(game) {
     return false;
   }
 
-  const rank =
-    game.activeRank;
+  const rank = game.activeRank;
 
   if (game.hand.length > 0) {
     game.piles[rank] =
-      game.hand.map(
-        (card, index) => ({
-          ...card,
-          faceUp:
-            index ===
-            game.hand.length - 1,
-        })
-      );
+      game.hand.map((card, index) => ({
+        ...card,
+        faceUp:
+          index === game.hand.length - 1,
+      }));
   } else {
     game.piles[rank] = [];
   }
@@ -419,23 +379,17 @@ export function dealOne(game) {
     return;
   }
 
-  const pileRank =
-    RANKS[game.currentPile];
+  const pileRank = RANKS[game.currentPile];
 
   const card = {
     ...game.stock.pop(),
     faceUp: true,
   };
 
-  game.piles[
-    pileRank
-  ].push(card);
+  game.piles[pileRank].push(card);
 
-  const isAce =
-    card.rank === "A";
-
-  const isMatch =
-    card.rank === pileRank;
+  const isAce = card.rank === "A";
+  const isMatch = card.rank === pileRank;
 
   // Every Ace sends one extra card
   // face-down to Discard.
@@ -452,9 +406,24 @@ export function dealOne(game) {
     burnCard(game);
   }
 
+  // Remember whether this card was dealt
+  // into the K pile. That means an entire
+  // A-through-K round has just completed.
+  const completedRound =
+    game.currentPile === RANKS.length - 1;
+
   game.currentPile =
-    (game.currentPile + 1) %
-    RANKS.length;
+    (game.currentPile + 1) % RANKS.length;
+
+  // Every completed A-through-K round sends
+  // one additional card face-down to Discard.
+  //
+  // This belongs here rather than in dealRound()
+  // so Deal One and Deal Round follow exactly
+  // the same rule.
+  if (completedRound) {
+    burnCard(game);
+  }
 
   if (game.stock.length === 0) {
     beginPlay(game);
@@ -466,9 +435,6 @@ export function dealRound(game) {
     return;
   }
 
-  const startingPile =
-    game.currentPile;
-
   for (
     let i = 0;
     i < RANKS.length &&
@@ -476,20 +442,5 @@ export function dealRound(game) {
     i++
   ) {
     dealOne(game);
-  }
-
-  // Completing a full A-through-K round
-  // sends one additional card face-down
-  // to Discard.
-  if (
-    game.phase === "Deal" &&
-    game.currentPile ===
-      startingPile
-  ) {
-    burnCard(game);
-
-    if (game.stock.length === 0) {
-      beginPlay(game);
-    }
   }
 }
