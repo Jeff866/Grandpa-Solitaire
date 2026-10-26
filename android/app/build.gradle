@@ -6,7 +6,7 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.grandpasgames.solitaire"
+        applicationId "com.jeffbusch.grandpassolitaire104"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
