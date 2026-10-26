@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Grandpa\'s Solitaire</string>
+    <string name="title_activity_main">Grandpa\'s Solitaire</string>
+    <string name="package_name">com.grandpasgames.solitaire</string>
+    <string name="custom_url_scheme">com.grandpasgames.solitaire</string>
+</resources>
