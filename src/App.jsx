@@ -245,6 +245,46 @@ export default function App() {
     });
   }
 
+  /*
+   * Double-click / double-tap a playable card.
+   * One destination plays immediately; two destinations
+   * keep the card selected so both foundations highlight.
+   */
+  function handleCardQuickPlay(source, card) {
+    if (
+      (game.phase !== "Play" && game.phase !== "FinalPass") ||
+      !card
+    ) {
+      return;
+    }
+
+    const currentCard =
+      source.type === "hand"
+        ? game.hand[source.index]
+        : game.piles[source.rank]?.at(-1);
+
+    // Do not act on a card that moved between taps.
+    if (!currentCard || currentCard.id !== card.id) {
+      return;
+    }
+
+    const moves = legalMoves(game, currentCard);
+
+    if (moves.length === 1) {
+      updateGame((updated) => {
+        if (source.type === "hand") {
+          playCard(updated, moves[0], source.index);
+        } else {
+          playDealPileCard(updated, source.rank, moves[0]);
+        }
+      });
+      setSelectedSource(null);
+      setDraggedSource(null);
+    } else if (moves.length === 2) {
+      setSelectedSource(source);
+    }
+  }
+
   function handleHandDragStart(
     card,
     index
@@ -570,6 +610,9 @@ export default function App() {
                     onSelect={
                       handleDealPileSelect
                     }
+                    onQuickPlay={(rank, card) =>
+                      handleCardQuickPlay({ type: "deal", rank }, card)
+                    }
                     onDragCardStart={
                       handleDealPileDragStart
                     }
@@ -802,6 +845,9 @@ export default function App() {
               }
               onSelectCard={
                 handleHandCardSelect
+              }
+              onQuickPlayCard={(card, index) =>
+                handleCardQuickPlay({ type: "hand", index }, card)
               }
               onDragCardStart={
                 handleHandDragStart
