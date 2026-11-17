@@ -683,8 +683,7 @@ export default function App() {
                   }
                   disabled={
                     !game.activeRank ||
-                    game.hand.length ===
-                      0
+                    Boolean(game.activeDiscard)
                   }
                   style={{
                     marginLeft:
